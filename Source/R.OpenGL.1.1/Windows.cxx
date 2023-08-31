@@ -83,19 +83,13 @@ namespace Renderer::Module
             .dmPelsHeight = State.Window.Height
         };
 
-        if (ChangeDisplaySettingsA(&dm, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
-        {
-            Quit("Unable to change display settings."); return FALSE;
-        }
+        if (ChangeDisplaySettingsA(&dm, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL) { Quit("Unable to change display settings."); }
 
         GL::Release();
 
         State.Window.DeviceContext = GetDC(State.Window.HWND);
 
-        if (State.Window.DeviceContext == NULL)
-        {
-            Quit("Unable to acquire device context."); return FALSE;
-        }
+        if (State.Window.DeviceContext == NULL) { Quit("Unable to acquire device context."); }
 
         PIXELFORMATDESCRIPTOR pfd =
         {
@@ -111,22 +105,13 @@ namespace Renderer::Module
 
         DescribePixelFormat(State.Window.DeviceContext, pf, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
-        if (pfd.dwFlags & PFD_GENERIC_FORMAT)
-        {
-            Quit("OpenGL acceleration is not supported."); return FALSE;
-        }
+        if (pfd.dwFlags & PFD_GENERIC_FORMAT) { Quit("OpenGL acceleration is not supported."); }
 
-        if (!SetPixelFormat(State.Window.DeviceContext, pf, &pfd))
-        {
-            Quit("Unable to set pixel format."); return FALSE;
-        }
+        if (!SetPixelFormat(State.Window.DeviceContext, pf, &pfd)) { Quit("Unable to set pixel format."); }
 
         State.Window.RenderContext = wglCreateContext(State.Window.DeviceContext);
 
-        if (State.Window.RenderContext == NULL)
-        {
-            Quit("Unable to create rendering context."); return FALSE;
-        }
+        if (State.Window.RenderContext == NULL) { Quit("Unable to create rendering context."); }
 
         wglMakeCurrent(State.Window.DeviceContext, State.Window.RenderContext);
 

@@ -78,7 +78,7 @@ namespace Renderer::Module
 
         if (!GL::InitializeCache(&State.GL.Textures.Cache, MAX_TEXTURE_COUNT))
         {
-            Quit("Unable to initialize texture cache."); return FALSE;
+            Quit("Unable to initialize texture cache.");
         }
 
         return TRUE;
