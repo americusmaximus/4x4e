@@ -64,7 +64,7 @@ namespace Renderer::Module
         State.DX.Mode.UnknownValue101 = 0.0f; // TODO
 
         Settings::ReadValue(RENDERER_MODULE_OPTIONS_GRAPHICS_SECTION_NAME,
-            RENDERER_MODULE_OPTIONS_GRAPHICS_WINDOW_MODE_BUFFER_NAME, (u32*)&State.Settings.WindowMode);
+            RENDERER_MODULE_OPTIONS_GRAPHICS_WINDOW_MODE_NAME, (u32*)&State.Settings.WindowMode);
         Settings::ReadValue(RENDERER_MODULE_OPTIONS_GRAPHICS_SECTION_NAME,
             RENDERER_MODULE_OPTIONS_GRAPHICS_USE_FIXED_FUNCTION_PIPELINE_NAME, (u32*)&State.Settings.FixedPipelineMode);
         Settings::ReadValue(RENDERER_MODULE_OPTIONS_GRAPHICS_SECTION_NAME,
