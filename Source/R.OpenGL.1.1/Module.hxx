@@ -28,9 +28,9 @@ SOFTWARE.
 #include "Settings.hxx"
 
 #ifdef _WIN64
-#define RENDERER_MODULE_TITLE_NAME "OpenGL 1.0 (x64)"
+#define RENDERER_MODULE_TITLE_NAME "OpenGL 1.1 (x64)"
 #else
-#define RENDERER_MODULE_TITLE_NAME "OpenGL 1.0 (x32)"
+#define RENDERER_MODULE_TITLE_NAME "OpenGL 1.1 (x32)"
 #endif
 
 namespace Renderer::Module
