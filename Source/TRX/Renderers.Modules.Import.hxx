@@ -114,6 +114,7 @@ namespace Renderers::Modules
     typedef const u32(CDECLAPI* RENDERERACQUIREMODULENAME) (char*);
     typedef const u32(CDECLAPI* RENDERERACQUIRETEXTUREHANDLE) (void);
     typedef const u32(CDECLAPI* RENDERERACQUIRETEXTUREINFORMATION) (const u32);
+    typedef const u32(CDECLAPI* RENDERERACQUIREVIDEOMEMORY) (u32*, u32*, u32*);
     typedef const u32(CDECLAPI* RENDERERADD3DLINE) (void);
     typedef const u32(CDECLAPI* RENDERERADDDYNAMICLIGHT) (void);
     typedef const u32(CDECLAPI* RENDERERADDPARTICLE) (void);
@@ -124,8 +125,8 @@ namespace Renderers::Modules
     typedef const u32(CDECLAPI* RENDERERDOTLISTD3DL) (Renderers::RLVX*, const u32, const Renderers::RendererMode);
     typedef const u32(CDECLAPI* RENDERERDOTLISTD3DTL) (Renderers::RTLVX*, const u32, const Renderers::RendererMode);
     typedef const u32(CDECLAPI* RENDERERDRAWPIXELS) (void);
-    typedef const u32(CDECLAPI* RENDERERDRAWPOLYGON) (Renderers::RPVX*, const u32, const Renderers::RendererMode);
-    typedef const u32(CDECLAPI* RENDERERDRAWPOLYGON2) (Renderers::RPVX**, const u32, const Renderers::RendererMode);
+    typedef const u32(CDECLAPI* RENDERERDRAWPOLYGON) (const Renderers::RPVX*, const u32, const Renderers::RendererMode);
+    typedef const u32(CDECLAPI* RENDERERDRAWPOLYGON2) (const Renderers::RPVX**, const u32, const Renderers::RendererMode);
     typedef const u32(CDECLAPI* RENDERERDRAWPOLYLIST) (const Renderers::RPVX*, const u16**, const u32, const Renderers::RendererMode);
     typedef const u32(CDECLAPI* RENDERERDRAWPOLYLIST2) (const Renderers::RPVX*, const u16**, const u32, const Renderers::RendererMode);
     typedef const u32(CDECLAPI* RENDERERDRAWPOLYLIST3) (const Renderers::RPVX*, const u16*, const u32, const Renderers::RendererMode);
@@ -137,8 +138,8 @@ namespace Renderers::Modules
     typedef const u32(CDECLAPI* RENDERERFLUSHPARTICLELIST) (void);
     typedef const u32(CDECLAPI* RENDERERINIT) (const HWND, const Renderers::Modules::RendererModuleInitializeArguments*);
     typedef const u32(CDECLAPI* RENDERERKILL) (void);
-    typedef const u32(CDECLAPI* RENDERERLINELISTD3DL) (Renderers::RLVX*, const u32, const Renderers::RendererMode);
-    typedef const u32(CDECLAPI* RENDERERLINELISTD3DTL) (Renderers::RTLVX*, const u32, const Renderers::RendererMode);
+    typedef const u32(CDECLAPI* RENDERERLINELISTD3DL) (const Renderers::RLVX*, const u32, const Renderers::RendererMode);
+    typedef const u32(CDECLAPI* RENDERERLINELISTD3DTL) (const Renderers::RTLVX*, const u32, const Renderers::RendererMode);
     typedef const u32(CDECLAPI* RENDERERLOCKFRAME) (void);
     typedef const u32(CDECLAPI* RENDERERLOCKFRAMEX) (void);
     typedef const u32(CDECLAPI* RENDERERLOCKHOLDBUFFER) (void);
@@ -150,7 +151,6 @@ namespace Renderers::Modules
     typedef const u32(CDECLAPI* RENDERERPOLYLISTD3DTL) (const Renderers::RTLVX*, const u32, const u16*, const u32, const Renderers::RendererMode);
     typedef const u32(CDECLAPI* RENDERERPOLYLISTL) (const Renderers::RVX*, const u32, const u16*, const u32, const Renderers::RendererMode);
     typedef const u32(CDECLAPI* RENDERERPOLYLISTTL) (const Renderers::RCVX*, const u32, const u16*, const u32, const Renderers::RendererMode);
-    typedef const u32(CDECLAPI* RENDERERRACQUIREVIDEOMEMORY) (u32*, u32*, u32*);
     typedef const u32(CDECLAPI* RENDERERRESETDYNAMICLIGHT) (void);
     typedef const u32(CDECLAPI* RENDERERRESETTEXTURECACHE) (void);
     typedef const u32(CDECLAPI* RENDERERRESTOREVIDEOMODE) (void);
