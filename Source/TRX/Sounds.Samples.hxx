@@ -22,18 +22,27 @@ SOFTWARE.
 
 #pragma once
 
-#include "Basic.hxx"
+#include "Objects.hxx"
+#include "Sounds.Basic.hxx"
 
-namespace Strings
+namespace Sounds
 {
-    inline BOOL IsNull(const char* value) { return value == NULL; }
+    SoundSample* ConstructSoundSample(SoundSample* self);
+    void* ReleaseSoundSample(SoundSample* self, const Objects::ReleaseMode mode);
 
-    inline BOOL IsNotNull(const char* value) { return value != NULL; }
+    struct SoundSampleContainer
+    {
+        // 0x005eec60
+        Objects::AbstractObjectInitializer SoundSampleInitializer =
+        {
+            .Options = 0x20100, // TODO
+            .Initialize = (Objects::ABSTRACTOBJECTINITIALIZERINITIALIZE)&ConstructSoundSample,
+            .Assign = NULL,
+            .Release = (Objects::ABSTRACTOBJECTINITIALIZERRELEASE)&ReleaseSoundSample,
+            .Size = sizeof(SoundSample),
+            .Name = "$SfxSample$$"
+        };
+    };
 
-    inline BOOL IsNullOrEmpty(const char* value) { return value == NULL || value[0] == NULL; }
-
-    inline BOOL IsNotNullOrEmpty(const char* value) { return (value != NULL && value[0] != NULL); }
-
-    BOOL EqualStrings(const char* s1, const char* s2);
-    BOOL StartsWithString(const char* str, const char* val);
+    extern SoundSampleContainer SoundSampleState;
 }

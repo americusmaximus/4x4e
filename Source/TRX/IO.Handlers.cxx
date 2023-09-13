@@ -20,20 +20,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include "IO.Handlers.hxx"
+#include "Logger.hxx"
 
-#include "Basic.hxx"
+using namespace Logger;
 
-namespace Strings
+namespace IO
 {
-    inline BOOL IsNull(const char* value) { return value == NULL; }
+    HandlerContainer HandlerState;
 
-    inline BOOL IsNotNull(const char* value) { return value != NULL; }
+    // 0x00432e00
+    // a.k.a. addGetFileInfoHook
+    void RegisterHandler(IOFILEHANDLER lambda)
+    {
+        if (MAX_FILE_HANDLER_INDEX < *HandlerState._Count) { LogError("Unable to register file handler, capacity reached."); }
 
-    inline BOOL IsNullOrEmpty(const char* value) { return value == NULL || value[0] == NULL; }
-
-    inline BOOL IsNotNullOrEmpty(const char* value) { return (value != NULL && value[0] != NULL); }
-
-    BOOL EqualStrings(const char* s1, const char* s2);
-    BOOL StartsWithString(const char* str, const char* val);
+        HandlerState._Handlers[*HandlerState._Count] = lambda;
+        *HandlerState._Count = *HandlerState._Count + 1;
+    }
 }

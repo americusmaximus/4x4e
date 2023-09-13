@@ -23,17 +23,32 @@ SOFTWARE.
 #pragma once
 
 #include "Basic.hxx"
+#include "Native.Basic.hxx"
 
-namespace Strings
+#define MAX_IO_FILE_NAME_LENGTH 260
+
+#define STANDARD_IO_DISK_NAME_LENGTH 3
+#define STANDARD_IO_FILE_NAME_LENGTH 256
+#define STANDARD_IO_DIRECTORY_NAME_LENGTH 256
+#define STANDARD_IO_EXTENSION_NAME_LENGTH 256
+
+namespace IO
 {
-    inline BOOL IsNull(const char* value) { return value == NULL; }
+    struct FileDescriptor
+    {
+        char Name[STANDARD_IO_FILE_NAME_LENGTH];
+        char Path[STANDARD_IO_FILE_NAME_LENGTH];
 
-    inline BOOL IsNotNull(const char* value) { return value != NULL; }
+        s32 Offset;
+        s32 Size;
 
-    inline BOOL IsNullOrEmpty(const char* value) { return value == NULL || value[0] == NULL; }
+        s32 Unk003; // TODO
+        s32 Unk004; // TODO
+        s32 Unk005; // TODO
+    };
 
-    inline BOOL IsNotNullOrEmpty(const char* value) { return (value != NULL && value[0] != NULL); }
-
-    BOOL EqualStrings(const char* s1, const char* s2);
-    BOOL StartsWithString(const char* str, const char* val);
+    void InitializeFileDescriptor(FileDescriptor* desc, const char* dir, const char* file);
+    BOOL HandleFileDescriptor(FileDescriptor* desc);
+    BOOL AcquireFileDescriptorDetails(FileDescriptor* self);
+    BOOL AcquireAbsoluteFilePath(char* buffer, const char* file);
 }

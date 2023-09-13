@@ -23,17 +23,34 @@ SOFTWARE.
 #pragma once
 
 #include "Basic.hxx"
+#include "Memory.hxx"
 
-namespace Strings
+namespace Objects
 {
-    inline BOOL IsNull(const char* value) { return value == NULL; }
+    // TODO
+    OPTIONS(ReleaseMode, u32)
+    {
+        None = 0,
+        Unknown1 = 1,
+        Unknown2 = 2,
+        Unknown4 = 4
+    };
 
-    inline BOOL IsNotNull(const char* value) { return value != NULL; }
+    typedef const void* (CDECLAPI* ABSTRACTOBJECTINITIALIZERINITIALIZE) (void* self);
+    typedef const void* (CDECLAPI* ABSTRACTOBJECTINITIALIZERASSIGN) (void* self, void* value);
+    typedef const void* (CDECLAPI* ABSTRACTOBJECTINITIALIZERRELEASE) (void* self, const ReleaseMode mode);
 
-    inline BOOL IsNullOrEmpty(const char* value) { return value == NULL || value[0] == NULL; }
+    struct AbstractObjectInitializer
+    {
+        u32 Options; // TODO enum
+        ABSTRACTOBJECTINITIALIZERINITIALIZE Initialize;
+        ABSTRACTOBJECTINITIALIZERASSIGN Assign;
+        ABSTRACTOBJECTINITIALIZERRELEASE Release;
+        u32 Size;
+        const char* Name;
+    };
 
-    inline BOOL IsNotNullOrEmpty(const char* value) { return (value != NULL && value[0] != NULL); }
-
-    BOOL EqualStrings(const char* s1, const char* s2);
-    BOOL StartsWithString(const char* str, const char* val);
+    void* InitializeObjectCollection(void* self, const u32 count, const AbstractObjectInitializer* initializer);
+    void* ReleaseObject(void* self, const AbstractObjectInitializer* initializer);
+    void* ReleaseObjectCollection(void* self, const u32 count, const AbstractObjectInitializer* initializer);
 }

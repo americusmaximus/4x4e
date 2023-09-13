@@ -22,18 +22,22 @@ SOFTWARE.
 
 #pragma once
 
-#include "Basic.hxx"
+#include "IO.hxx"
 
-namespace Strings
+#define MAX_FILE_HANDLER_COUNT 5
+#define MAX_FILE_HANDLER_INDEX (MAX_FILE_HANDLER_COUNT - 1)
+
+namespace IO
 {
-    inline BOOL IsNull(const char* value) { return value == NULL; }
+    typedef const BOOL(CDECLAPI* IOFILEHANDLER) (FileDescriptor* desc);
 
-    inline BOOL IsNotNull(const char* value) { return value != NULL; }
+    struct HandlerContainer
+    {
+        u32* _Count = (u32*)0x00719348; // TODO
+        IOFILEHANDLER* _Handlers = (IOFILEHANDLER*)0x0071934c; // TODO
+    };
 
-    inline BOOL IsNullOrEmpty(const char* value) { return value == NULL || value[0] == NULL; }
+    extern HandlerContainer HandlerState;
 
-    inline BOOL IsNotNullOrEmpty(const char* value) { return (value != NULL && value[0] != NULL); }
-
-    BOOL EqualStrings(const char* s1, const char* s2);
-    BOOL StartsWithString(const char* str, const char* val);
+    void RegisterHandler(IOFILEHANDLER lambda);
 }

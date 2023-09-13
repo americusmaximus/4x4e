@@ -20,20 +20,45 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include "Objects.hxx"
 
-#include "Basic.hxx"
-
-namespace Strings
+namespace Objects
 {
-    inline BOOL IsNull(const char* value) { return value == NULL; }
+    // TODO
+    void* InitializeObjectCollection(void* self, const u32 count, const AbstractObjectInitializer* initializer)
+    {
+        auto address = (addr)self;
 
-    inline BOOL IsNotNull(const char* value) { return value != NULL; }
+        for (u32 x = 0; x < count; x++)
+        {
+            initializer->Initialize((void*)address);
 
-    inline BOOL IsNullOrEmpty(const char* value) { return value == NULL || value[0] == NULL; }
+            address = address + initializer->Size;
+        }
 
-    inline BOOL IsNotNullOrEmpty(const char* value) { return (value != NULL && value[0] != NULL); }
+        return self;
+    }
 
-    BOOL EqualStrings(const char* s1, const char* s2);
-    BOOL StartsWithString(const char* str, const char* val);
+    // 0x005a0ca6
+    void* ReleaseObject(void* self, const AbstractObjectInitializer* initializer)
+    {
+        if (self == NULL) { return NULL; }
+
+        const auto count = *(u32*)(((addr)self) - 4); // TODO
+
+        ReleaseObjectCollection(self, count, initializer);
+
+        return (void*)(((addr)self) - 4); // TODO
+    }
+
+    // 0x005a0d15
+    void* ReleaseObjectCollection(void* self, const u32 count, const AbstractObjectInitializer* initializer)
+    {
+        for (u32 x = 0; x < count; x++)
+        {
+            initializer->Release((void*)(((addr)self) + x * initializer->Size), ReleaseMode::None);
+        }
+
+        return self;
+    }
 }

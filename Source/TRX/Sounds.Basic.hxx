@@ -24,6 +24,7 @@ SOFTWARE.
 
 #include "Basic.hxx"
 #include "Assets.Sounds.hxx"
+#include "IO.Streams.hxx"
 
 namespace Sounds
 {
@@ -73,29 +74,17 @@ namespace Sounds
     {
         SoundSampleDescriptor Descriptor;
 
-        //s32 Index;
-        //u32 BufferIndex;
-        //s32 StreamIndex;
-
-        //s32 Unk5; // 
-
-
-
         s32 Unk6; // TODO
         s32 Unk7; // TODO, some sort of index
         s32 Length; // TODO type
 
-        char Unk[320];
+        s32 Unk9;
+        s32 Unk10;
+        s32 Unl11;
+        s32 Unk12;
+        s32 Unk13;
 
-
-        ////s32 AllocatedMemorySize; // TODO better name!
-        ////s32 Unk10; // TODO
-        ////s32 Unk11; // TODO
-        ////SoundDecoder* Decoder;
-        ////s32 Unk13; // TODO
-        ////s32 LockOffset; // TODO
-        ////s32 LockLength; // TODO
-        ////s32 Unk16; // TODO
+        IO::Streams::InStreamFile File;
 
         struct
         {
@@ -116,9 +105,8 @@ namespace Sounds
         s32 Unknown105; // TODO
         f32 Volume;
         f32 HZ; // TODO
-        s32 Unknown1001; // TODO
-        s32 Unknown1002; // TODO
-        s32 Unknown1003; // TODO
+        f32 Unknown1001; // TODO
+        s32 Unknown1002[2]; // TODO
         u32 Unk30;// TODO enum
         s32 Unknown1004; // TODO
         f64 Unknown1005; // TODO
