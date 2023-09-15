@@ -64,6 +64,7 @@
     <ClCompile Include="IO.Handlers.cxx" />
     <ClCompile Include="IO.Streams.cxx" />
     <ClCompile Include="IO.Streams.InFileStream.cxx" />
+    <ClCompile Include="IO.Streams.InMemoryStream.cxx" />
     <ClCompile Include="Logger.cxx" />
     <ClCompile Include="Memory.cxx" />
     <ClCompile Include="Native.cxx" />

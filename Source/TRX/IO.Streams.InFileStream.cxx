@@ -55,7 +55,7 @@ namespace IO::Streams
     InStreamFile* ConstructInStreamFile(InStreamFile* self)
     {
         self = (InStreamFile*)InitializeAbstractInStream((AbstractInStream*)self);
-        self->Self = (InStreamFileSelf*)&InStreamFileState.InStreamFileSelf;
+        self->Self = &InStreamFileState.InStreamFileSelf;
 
         self->File.Handle = 0;
         self->File.Size = 0;
@@ -161,7 +161,7 @@ namespace IO::Streams
     }
 
     // 0x005729c0
-    s32 ReadInStreamFile(InStreamFile* self, void* data, const s32 count)
+    s32 ReadInStreamFile(InStreamFile* self, void* data, const u32 count)
     {
         if (self->File.Handle == NULL) { return STREAM_RESULT_FAILURE; }
         if (self->File.Size <= self->File.Position) { return STREAM_RESULT_END_OF_DATA; }
