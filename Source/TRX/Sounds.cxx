@@ -41,7 +41,7 @@ namespace Sounds
     // 0x0055fdb0
     SoundMixMode AcquireSoundMixMode2(void)
     {
-        return *SoundState._MixMode;
+        return SoundState.MixMode;
     }
 
     // 0x00560870
@@ -287,7 +287,7 @@ namespace Sounds
 
         if (*SoundState._SoundDeviceController == NULL) { return; }
 
-        if (AcquireSoundControllerMixMode() == SoundMixMode::None) { return; }
+        if (AcquireSoundDeviceControllerMixMode() == SoundMixMode::None) { return; }
 
         LockSounds();
 
@@ -303,5 +303,17 @@ namespace Sounds
         }
 
         UnlockSound1();
+    }
+
+    // 0x0055fdc0
+    // a.k.a. enableHwSoundMixing
+    void SelectSoundMixMode(const SoundMixMode mode)
+    {
+        if (AcquireSoundDeviceControllerState())
+        {
+            LogError("Unable to select hardware sound mixing mode while device is active.");
+        }
+
+        SoundState.MixMode = mode;
     }
 }

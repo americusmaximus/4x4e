@@ -343,7 +343,7 @@ namespace Sounds
                         SoundDirectSoundSoundControllerState.EAX.Instance->Set(IKsPropertySetImpl_QuerySupport, NULL, NULL, NULL, &value, sizeof(BOOL));
                     }
 
-                    if (AcquireSoundControllerMixMode() != SoundMixMode::None)
+                    if (AcquireSoundDeviceControllerMixMode() != SoundMixMode::None)
                     {
                         self = NULL;
 
@@ -409,7 +409,7 @@ namespace Sounds
     // 0x00555ee0
     BOOL PollSoundDirectSoundDeviceController(AbstractSoundDeviceController* self)
     {
-        if (AcquireSoundControllerMixMode() != SoundMixMode::None)
+        if (AcquireSoundDeviceControllerMixMode() != SoundMixMode::None)
         {
             PollSoundDirectSoundSoundControllerSoundEffect();
 
@@ -1268,7 +1268,7 @@ namespace Sounds
 
             f32 volume = 0.0f; // TODO constants
 
-            if (AcquireSoundControllerMixMode() != SoundMixMode::None)
+            if (AcquireSoundDeviceControllerMixMode() != SoundMixMode::None)
             {
                 volume = Clamp(time2 * 0.0000008477105f, 0.0f, 0.25f); // TODO constants
             }

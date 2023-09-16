@@ -251,4 +251,31 @@ namespace Sounds
 
         self->Position = position;
     }
+
+    // 0x0055d740
+    // a.k.a. popSfxOptions
+    void PopSoundEffectDescriptor(void)
+    {
+        *SoundState._SoundEffectDescriptorIndex = *SoundState._SoundEffectDescriptorIndex - 1;
+
+        if (*SoundState._SoundEffectDescriptorIndex < 0)
+        {
+            LogError("Unable to pop sound effect descriptor, the stack is empty.");
+        }
+    }
+
+    // 0x0055d6c0
+    // a.k.a. pushSfxOptions
+    void PushSoundEffectDescriptor(void)
+    {
+        *SoundState._SoundEffectDescriptorIndex = *SoundState._SoundEffectDescriptorIndex + 1;
+
+        if (7 < *SoundState._SoundEffectDescriptorIndex) // TODO constant
+        {
+            LogError("Unable to push sound effect descriptor, the stack is full.");
+        }
+
+        CopyMemory(&SoundState._SoundEffectDescriptor[*SoundState._SoundEffectDescriptorIndex],
+            &SoundState._SoundEffectDescriptor[*SoundState._SoundEffectDescriptorIndex - 1], sizeof(SoundEffectDescriptor));
+    }
 }
