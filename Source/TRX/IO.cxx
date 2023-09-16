@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include "ASCII.hxx"
 #include "IO.hxx"
 #include "IO.Handlers.hxx"
 #include "Strings.hxx"
@@ -28,6 +29,8 @@ SOFTWARE.
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#define MAX_IO_PATH_LENGTH 512
 
 using namespace Strings;
 
@@ -93,5 +96,57 @@ namespace IO
         strcpy(buffer, file);
 
         return FALSE;
+    }
+
+    // 0x00433750
+    void AcquireNormalizedFilePath(const char* path, char* name, char* file)
+    {
+        char indisk[MAX_IO_DISK_NAME_LENGTH];
+        char indir[STANDARD_IO_DIRECTORY_NAME_LENGTH];
+        char infile[STANDARD_IO_FILE_NAME_LENGTH];
+        char inext[STANDARD_IO_EXTENSION_NAME_LENGTH];
+
+        _splitpath(name, indisk, indir, infile, inext);
+
+        if (indisk[0] != NULL
+            || ((indir[0] == ASCII_BACK_SLASH || indir[0] == ASCII_SLASH) && (indir[1] == ASCII_BACK_SLASH || indir[1] == ASCII_SLASH)))
+        {
+            strcpy(file, name);
+
+            return;
+        }
+
+        char resdir[MAX_IO_PATH_LENGTH];
+        char resdisk[MAX_IO_DISK_NAME_LENGTH];
+
+        AcquireNormalizedDirectoryPath(path, resdisk, resdir);
+
+        if (indir[0] == ASCII_SLASH || indir[0] == ASCII_BACK_SLASH) { resdir[0] = NULL; }
+
+        strcat(resdir, indir);
+
+        _makepath(file, resdisk, resdir, infile, inext);
+    }
+
+    // 0x004335a0
+    void AcquireNormalizedDirectoryPath(const char* path, char* disk, char* dir)
+    {
+        char indir[STANDARD_IO_DIRECTORY_NAME_LENGTH];
+        char infile[STANDARD_IO_FILE_NAME_LENGTH];
+        char inext[STANDARD_IO_EXTENSION_NAME_LENGTH];
+
+        _splitpath(path, disk, indir, infile, inext);
+        _makepath(dir, NULL, indir, infile, inext);
+
+        if (IsNotNullOrEmpty(dir))
+        {
+            const auto len = strlen(dir);
+
+            if (dir[len - 1] != ASCII_BACK_SLASH && dir[len - 1] != ASCII_SLASH)
+            {
+                dir[len] = ASCII_BACK_SLASH;
+                dir[len + 1] = NULL;
+            }
+        }
     }
 }
