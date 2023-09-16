@@ -33,7 +33,7 @@ namespace Sounds
     struct SoundSampleContainer
     {
         // 0x005eec60
-        Objects::AbstractObjectInitializer SoundSampleInitializer =
+        Objects::AbstractObjectInitializer Initializer =
         {
             .Options = 0x20100, // TODO
             .Initialize = (Objects::ABSTRACTOBJECTINITIALIZERINITIALIZE)&ConstructSoundSample,

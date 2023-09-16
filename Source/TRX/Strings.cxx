@@ -28,16 +28,15 @@ SOFTWARE.
 
 namespace Strings
 {
-    BOOL EqualStrings(const char* s1, const char* s2)
-    {
-        return strcmpi(s1, s2) == 0;
-    }
+    BOOL EqualStrings(const char* s1, const char* s2) { return strcmpi(s1, s2) == 0; }
 
-    BOOL StartsWithString(const char* str, const char* val)
+    BOOL StartsWithString(const char* s1, const char* s2)
     {
-        const auto vl = strlen(val);
-        const auto sl = strlen(str);
+        if (s1 == s2) { return TRUE; }
 
-        return sl < vl ? FALSE : strnicmp(val, str, vl) == 0;
+        const auto s1l = strlen(s1);
+        const auto s2l = strlen(s2);
+
+        return s1l < s2l ? FALSE : strnicmp(s2, s1, s2l) == 0;
     }
 }

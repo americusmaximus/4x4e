@@ -184,7 +184,7 @@ namespace IO::Streams
         InStreamFileSelf InStreamFileSelf; // 0x005eee54
 
         // 0x005ea810
-        Objects::AbstractObjectInitializer InStreamFileInitializer =
+        Objects::AbstractObjectInitializer Initializer =
         {
             .Options = 0x20100, // TODO
             .Initialize = (Objects::ABSTRACTOBJECTINITIALIZERINITIALIZE)&ConstructInStreamFile,
@@ -269,7 +269,7 @@ namespace IO::Streams
         InStreamMemorySelf InStreamMemorySelf; // 0x005eee94
 
         // 0x005eb0e0
-        Objects::AbstractObjectInitializer InStreamMemoryInitializer =
+        Objects::AbstractObjectInitializer Initializer =
         {
             .Options = 0x20100, // TODO
             .Initialize = (Objects::ABSTRACTOBJECTINITIALIZERINITIALIZE)&ConstructInStreamMemory,
