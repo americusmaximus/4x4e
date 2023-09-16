@@ -121,7 +121,7 @@ namespace Sounds
 
         s32 UnknownIndex; // TODO
 
-        s32 Unk32; // TODO check the possible values. So far it looks either as Index or an Active/Inactive flag.
+        BOOL Unk32; // TODO enum
 
         SoundSample* Sample;
 

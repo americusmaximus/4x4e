@@ -278,4 +278,91 @@ namespace Sounds
         CopyMemory(&SoundState._SoundEffectDescriptor[*SoundState._SoundEffectDescriptorIndex],
             &SoundState._SoundEffectDescriptor[*SoundState._SoundEffectDescriptorIndex - 1], sizeof(SoundEffectDescriptor));
     }
+
+    // 0x0055a520
+    SoundEffect* AcquireSoundEffect(const u32 indx, const BOOL mode)
+    {
+        const auto todo = indx >> 6; // TODO constant
+        const auto index = indx & 0x3f; // TODO constant
+
+        if (todo != 0 && todo < 0xffffff && index < 64) // TODO constant
+        {
+            auto effect = &SoundState.Effects._Cache[index];
+
+            if (effect->Unk32 == todo)
+            {
+                if (mode)
+                {
+                    LockSounds();
+
+                    if (effect->Unk32 != todo || effect->Sample == NULL)
+                    {
+                        UnlockSound1();
+
+                        return NULL;
+                    }
+
+                    if (effect->UnknownIndex != 0)
+                    {
+                        if (*SoundState._SoundDeviceController == NULL)
+                        {
+                            DisposeSoundEffect(effect);
+                            UnlockSound1();
+
+                            return NULL;
+                        }
+
+                        if (effect->Options & 0x40000000) { return effect; } // TODO constant
+
+                        if (!(*SoundState._SoundDeviceController)->Self->AcquireSoundEffectState(*SoundState._SoundDeviceController, effect))
+                        {
+                            DisposeSoundEffect(effect);
+                            UnlockSound1();
+
+                            return NULL;
+                        }
+                    }
+                }
+
+                return effect;
+            }
+        }
+
+        return NULL;
+    }
+
+    // 0x0055e190
+    BOOL SelectSoundEffectVolume(const u32 indx, const f32 volume)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Descriptor.Volume = volume;
+        effect->Options = effect->Options | 8; // TODO constant
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055e1c0
+    BOOL SelectSoundEffectFrequency(const u32 indx, const f32 hz)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Descriptor.HZ = hz;
+        effect->Options = effect->Options | 0x10; // TODO constant
+
+        if (effect->UnknownIndex != 0 && *SoundState._SoundDeviceController != NULL)
+        {
+            (*SoundState._SoundDeviceController)->Self->SelectSoundEffectOptions(*SoundState._SoundDeviceController, effect, 0x10); // TODO constant
+        }
+
+        UnlockSound1();
+
+        return TRUE;
+    }
 }

@@ -55,4 +55,6 @@ namespace IO
 
     void AcquireNormalizedFilePath(const char* path, char* name, char* file);
     void AcquireNormalizedDirectoryPath(const char* path, char* disk, char* dir);
+
+    s32 AcquireFileSize(const char* dir, const char* file);
 }

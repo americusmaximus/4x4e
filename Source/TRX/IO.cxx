@@ -149,4 +149,16 @@ namespace IO
             }
         }
     }
+
+    // 0x00432f70
+    s32 AcquireFileSize(const char* dir, const char* file)
+    {
+        FileDescriptor desc;
+
+        InitializeFileDescriptor(&desc, dir, file);
+
+        if (HandleFileDescriptor(&desc)) { return desc.Size; }
+
+        return INVALID_FILE_SIZE;
+    }
 }
