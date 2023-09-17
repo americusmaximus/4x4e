@@ -161,13 +161,14 @@ namespace Sounds
     void SelectSoundEffectChannelVolume(const s32 indx, const f32 volume);
     void* LockSoundSample(SoundSample* self, const s32 offset, const s32 length);
     void UnlockSoundSample(SoundSample* self);
-    s32 AcquireSoundSampleOffset(SoundSample* self, const s32 offset);
+    s32 AcquireSoundSampleDescriptorOffset(SoundSampleDescriptor* self, const s32 offset);
     BOOL PollSoundEffectStream(SoundEffect* self);
     void UpdateSoundEffectPosition(SoundEffect* self, const f64 position);
-    u32 AcquireUnknownSoundSampleValue1(SoundSample* self);
+    u32 AcquireUnknownSoundSampleDescriptorValue1(SoundSampleDescriptor* self);
     void InitializeSoundEffectDescriptor(SoundEffectDescriptor* self);
     void PopSoundEffectDescriptor(void);
     void PushSoundEffectDescriptor(void);
+    void LoadSoundSampleDescriptor(SoundSampleDescriptor* self);
 
     typedef const BOOL(CDECLAPI* FUN_005550E0) (void); // TODO
     static FUN_005550E0 FUN_005550e0 = (FUN_005550E0)0x005550e0;//TODO
