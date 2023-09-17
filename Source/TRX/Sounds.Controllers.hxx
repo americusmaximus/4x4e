@@ -116,6 +116,8 @@ namespace Sounds
         SoundMixMode* _MixMode = (SoundMixMode*)0x00d62020; // TODO
         BOOL MuteMode; // 0x00d62024
 
+        u32* _Options = (u32*)0x00d621bc; // TODO enum
+
         void** _UnknownMemory1 = (void**)0x00d6205c; // TODO
         void** _UnknownMemory2 = (void**)0x00d62080; // TODO
         void** _UnknownMemory3 = (void**)0x00d62038; // TODO
@@ -155,4 +157,8 @@ namespace Sounds
 
     BOOL AcquireSoundDeviceControllerMuteMode(void);
     BOOL SelectSoundDeviceControllerMuteMode(const BOOL mode);
+
+    void SelectSoundDeviceControllerVelocity(const f32 x, const f32 y, const f32 z);
+    void SelectSoundDeviceControllerOrientation(const f32 x, const f32 y, const f32 z, const f32 xt, const f32 yt, const f32 zt, const f32 xf, const f32 yf, const f32 zf);
+    void SelectSoundDeviceControllerPosition(const f64 x, const f64 y, const f64 z);
 }
