@@ -26,13 +26,13 @@ SOFTWARE.
 
 namespace Logger
 {
-	struct LoggerContainer
-	{
-		BOOL IsOpen; // 0x00adf6b0
-	};
+    struct LoggerContainer
+    {
+        BOOL IsOpen; // 0x00adf6b0
+    };
 
-	extern LoggerContainer LoggerState;
+    extern LoggerContainer LoggerState;
 
-	void LogMessage(const char* format ...);
-	void __declspec(noreturn) LogError(const char* format ...);
+    void LogMessage(const char* format ...);
+    void __declspec(noreturn) LogError(const char* format ...);
 }

@@ -20,18 +20,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include "Graphics.hxx"
+#include "Input.Mouse.hxx"
+#include "Native.Basic.hxx"
 
-#include "Basic.hxx"
+using namespace Graphics;
 
-#define APP_NAME "4x4 Evolution"
-
-namespace App
+namespace Input
 {
-    struct ApplicationContainer
+    // 0x0059be80
+    void SetCursorPosition(const s32 x, const s32 y)
     {
-        BOOL* _IsQuit = (BOOL*)0x00db2a90;//TODO
-    };
+        SetCursorPos(x, y);
 
-    extern ApplicationContainer AppState;
+        *GraphicsState.View._Width = x;
+        *GraphicsState.View._Height = y;
+    }
 }

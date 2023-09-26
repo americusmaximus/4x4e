@@ -215,7 +215,7 @@ namespace Sounds
 
         if (hz != NULL) { *hz = *SoundState.Options._HZ; }
     }
-    
+
     // 0x005a0d5f
     f64 AcquireUnknownSoundValue101(const f64 value)
     {
@@ -315,5 +315,38 @@ namespace Sounds
         }
 
         SoundState.MixMode = mode;
+    }
+
+    // 0x0055e8c0
+    u32 UpdateSoundEffectPositionCount(const f64 x, const f64 y, const f64 z)
+    {
+        if (*SoundState._UnknownSoundCount1 != 0) // TODO constant
+        {
+            const auto dx0 = (x - SoundState.Effects.Position._X[0]) * (x - SoundState.Effects.Position._X[0]);
+            const auto dy0 = (y - SoundState.Effects.Position._Y[0]) * (y - SoundState.Effects.Position._Y[0]);
+            const auto dz0 = (z - SoundState.Effects.Position._Z[0]) * (z - SoundState.Effects.Position._Z[0]);
+
+            const auto dx1 = (x - SoundState.Effects.Position._X[1]) * (x - SoundState.Effects.Position._X[1]);
+            const auto dy1 = (y - SoundState.Effects.Position._Y[1]) * (y - SoundState.Effects.Position._Y[1]);
+            const auto dz1 = (z - SoundState.Effects.Position._Z[1]) * (z - SoundState.Effects.Position._Z[1]);
+
+            if ((dx1 + dy1 + dz1) <= (dx0 + dy0 + dz0)) { return 1; } // TODO constant
+        }
+
+        return 0; // TODO constant
+    }
+
+    // 0x0055eee0
+    void ReleaseSounds(void)
+    {
+        LockSounds();
+        ReleaseSoundEffectSamples();
+
+        for (u32 x = 0; x < 64; x++) // TODO constant
+        {
+            DisposeSoundSample(&SoundState._SoundEffectSamples[x]);
+        }
+
+        UnlockSound1();
     }
 }

@@ -20,18 +20,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#pragma once
+#include "Editor.Window.hxx"
 
-#include "Basic.hxx"
-
-#define APP_NAME "4x4 Evolution"
-
-namespace App
+namespace Editor
 {
-    struct ApplicationContainer
-    {
-        BOOL* _IsQuit = (BOOL*)0x00db2a90;//TODO
-    };
-
-    extern ApplicationContainer AppState;
+    WindowContainer WindowState;
 }

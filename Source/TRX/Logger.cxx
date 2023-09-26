@@ -20,11 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include "App.Windows.hxx"
+#include "Graphics.hxx"
 #include "Logger.hxx"
 #include "Native.hxx"
-#include "App.Windows.hxx"
 #include "Native.hxx"
-//#include "Graphics.hxx"
 #include "Time.hxx"
 
 #include <stdarg.h>
@@ -35,8 +35,8 @@ SOFTWARE.
 #define MAX_LOG_MESSAGE_BUFFER_SIZE 1024
 
 using namespace App::Windows;
+using namespace Graphics;
 using namespace Native;
-//using namespace Graphics;
 using namespace Time;
 
 namespace Logger
@@ -89,7 +89,7 @@ namespace Logger
 
         if (IsDebuggerActive()) { Halt(); }
 
-        // TODO ReleaseGraphics();
+        ReleaseGraphics();
 
         ReleaseTime();
 

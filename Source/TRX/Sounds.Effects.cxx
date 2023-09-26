@@ -24,6 +24,8 @@ SOFTWARE.
 #include "Sounds.hxx"
 #include "Sounds.Effects.hxx"
 
+#include <math.h>
+
 using namespace Logger;
 using namespace Objects;
 
@@ -275,8 +277,8 @@ namespace Sounds
             LogError("Unable to push sound effect descriptor, the stack is full.");
         }
 
-        CopyMemory(&SoundState._SoundEffectDescriptor[*SoundState._SoundEffectDescriptorIndex],
-            &SoundState._SoundEffectDescriptor[*SoundState._SoundEffectDescriptorIndex - 1], sizeof(SoundEffectDescriptor));
+        CopyMemory(&SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex],
+            &SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex - 1], sizeof(SoundEffectDescriptor));
     }
 
     // 0x0055a520
@@ -374,5 +376,45 @@ namespace Sounds
         *SoundState.Effects._Index = indx;
 
         UnlockSound1();
+    }
+
+    // 0x0055b6e0
+    void UpdateSoundEffectChannelsPosition(SoundEffect* self)
+    {
+        for (u32 x = 0; x < *SoundState.Options._ChannelCount; x++)
+        {
+            const auto dx = self->Descriptor.Location.X - SoundState.Effects.Channels.Position._X[x];
+            const auto dy = self->Descriptor.Location.Y - SoundState.Effects.Channels.Position._Y[x];
+            const auto dz = self->Descriptor.Location.Z - SoundState.Effects.Channels.Position._Z[x];
+
+            self->Distances[x] = (f32)sqrt(dx * dx + dy * dy + dz * dz);
+        }
+    }
+
+    // 0x0055d4c0
+    void SelectSoundEffectDescriptorVolume(const f32 volume)
+    {
+        SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].Volume = volume;
+    }
+
+    // 0x0055d560
+    // a.k.a. setNextSfxChannel
+    void SelectNextSoundEffectDescriptorChannel(const s32 indx)
+    {
+        if (indx < 0 || 31 < indx) { LogError("Invalid sound channel index %d.", indx); } // TODO constnats
+
+        SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].NextChannelIndex = indx;
+    }
+
+    // 0x0055d600
+    void UpdateSoundEffectDescriptorUnk30(const u32 mode) // TODO name, enum
+    {
+        SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].Unk30 = SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].Unk30 | mode;
+    }
+
+    // 0x0055d5e0
+    void SelectSoundEffectDescriptorUnk30(const u32 mode) // TODO name, enum
+    {
+        SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].Unk30 = mode;
     }
 }

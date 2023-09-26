@@ -24,14 +24,7 @@ SOFTWARE.
 
 #include "Basic.hxx"
 
-#define APP_NAME "4x4 Evolution"
-
-namespace App
+namespace Input
 {
-    struct ApplicationContainer
-    {
-        BOOL* _IsQuit = (BOOL*)0x00db2a90;//TODO
-    };
-
-    extern ApplicationContainer AppState;
+    void SetCursorPosition(const s32 x, const s32 y);
 }

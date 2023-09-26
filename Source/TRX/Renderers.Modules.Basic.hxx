@@ -48,10 +48,10 @@ namespace Renderers::Modules
         u32* Unk11; //TODO type
         u32* Unk12; //TODO type
         u32* Unk13; //TODO
-        void* Unk14; //TODO
-        void* Unk15; //TODO
-        void* Unk16; //TODO
-        void* Unk17; //TODO
+        s32* Unk14; //TODO
+        s32* Unk15; //TODO
+        s32* Unk16; //TODO
+        s32* Unk17; //TODO
         void* Unk18; //TODO
         u32* TextureSize;
         void* Unk20; //TODO

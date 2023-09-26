@@ -24,14 +24,48 @@ SOFTWARE.
 
 #include "Basic.hxx"
 
-#define APP_NAME "4x4 Evolution"
+#define MAX_EDITOR_WINDOW_COUNT 5
 
-namespace App
+namespace Editor
 {
-    struct ApplicationContainer
+    struct Window
     {
-        BOOL* _IsQuit = (BOOL*)0x00db2a90;//TODO
+        s32 Unk001; // TODO
+        s32 Unk002; // TODO
+        s32 Unk003; // TODO
+        s32 Unk004; // TODO
+
+        s32 Unk005; // TODO
+        s32 Unk006; // TODO
+        s32 Unk007; // TODO
+        s32 Unk008; // TODO
+
+        f32 Unk009; // TODO
+        f32 Unk010; // TODO
+        f32 Unk011; // TODO
+        f32 Unk012; // TODO
+
+        s32 Unk013; // TODO
+        s32 Unk014; // TODO
+        s32 Unk015; // TODO
+        s32 Unk016; // TODO
+        s32 Unk017; // TODO
+        s32 Unk018; // TODO
+        s32 Unk019; // TODO
+        s32 Unk020; // TODO
+        s32 Unk021; // TODO
+
+        char Unknown1[388]; // TODO
+
+        void* AllocatedMemory; // TODO
+
+        char Unknown2[28]; // TODO
     };
 
-    extern ApplicationContainer AppState;
+    struct WindowContainer
+    {
+        Window* _Windows = (Window*)0x0071afa0; // TODO an array of [MAX_EDITOR_WINDOW_COUNT]
+    };
+
+    extern WindowContainer WindowState;
 }

@@ -23,15 +23,30 @@ SOFTWARE.
 #pragma once
 
 #include "Basic.hxx"
+#include "Objects.hxx"
 
-#define APP_NAME "4x4 Evolution"
-
-namespace App
+namespace Editor
 {
-    struct ApplicationContainer
+    struct ScrollBar
     {
-        BOOL* _IsQuit = (BOOL*)0x00db2a90;//TODO
+        s32 Unk1; // TODO
+        s32 Unk2; // TODO
+        s32 Unk3; // TODO
+        s32 Unk4; // TODO
+        s32 Unk5; // TODO
+        s32 Unk6; // TODO
+        s32 Unk7; // TODO
+        s32 Unk8; // TODO
+        s32 Unk9; // TODO
+        s32 Unk10;// TODO
+        s32 Unk11;// TODO
+        s32 Unk12;// TODO
+        s32 Unk13;// TODO
+        s32 Unk14;// TODO
     };
 
-    extern ApplicationContainer AppState;
+    ScrollBar* ConstructScrollBar(ScrollBar* self);
+    void* ReleaseScrollBar(ScrollBar* self, const Objects::ReleaseMode mode);
+    void ClearScrollBar(ScrollBar* self);
+    void ComputeScrollBar(ScrollBar* self);
 }

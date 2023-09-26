@@ -22,16 +22,22 @@ SOFTWARE.
 
 #pragma once
 
-#include "Basic.hxx"
+#include "Editor.hxx"
 
-#define APP_NAME "4x4 Evolution"
+#define MAX_CLIPBOARD_NULL_STING_LENGTH 4
 
-namespace App
+namespace Editor
 {
-    struct ApplicationContainer
+    struct ClipboardContainer
     {
-        BOOL* _IsQuit = (BOOL*)0x00db2a90;//TODO
+        const char NullInString[MAX_CLIPBOARD_NULL_STING_LENGTH] = { NULL, NULL, NULL, NULL }; // 0x005c1af8
+        const char NullOutString[MAX_CLIPBOARD_NULL_STING_LENGTH] = { NULL, NULL, NULL, NULL }; // 0x005c1af7
+
+        char* Value; // 0x0071af98
     };
 
-    extern ApplicationContainer AppState;
+    extern ClipboardContainer ClipboardState;
+
+    char* AcquireClipboardValue(Editor* self);
+    void SelectClipboardValue(Editor* self, const char* value);
 }

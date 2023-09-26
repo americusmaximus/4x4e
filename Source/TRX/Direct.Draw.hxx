@@ -22,16 +22,7 @@ SOFTWARE.
 
 #pragma once
 
-#include "Basic.hxx"
+#include "Native.Basic.hxx"
 
-#define APP_NAME "4x4 Evolution"
-
-namespace App
-{
-    struct ApplicationContainer
-    {
-        BOOL* _IsQuit = (BOOL*)0x00db2a90;//TODO
-    };
-
-    extern ApplicationContainer AppState;
-}
+#define   DIRECTDRAW_VERSION 0x0700
+#include <ddraw.h>

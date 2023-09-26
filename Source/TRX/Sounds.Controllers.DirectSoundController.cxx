@@ -1261,7 +1261,7 @@ namespace Sounds
         {
             *SoundState._SoundTime1 = time1;
 
-            if (*SoundState._SoundTimeUnknown1 == 0) // TODO constants
+            if (*SoundState._UnknownSoundCount1 == 0) // TODO constants
             {
                 FUN_00559cf0();
             }

@@ -106,6 +106,16 @@ namespace Sounds
                 f64* _Y = (f64*)0x00d615d0; // TODO array of 2
                 f64* _Z = (f64*)0x00d615e0; // TODO array of 2
             } Position;
+
+            struct
+            {
+                struct
+                {
+                    f64* _X = (f64*)0x00d620d8; // TODO array of 8
+                    f64* _Y = (f64*)0x00d62118; // TODO array of 8
+                    f64* _Z = (f64*)0x00d62158; // TODO array of 8
+                } Position;
+            } Channels;
         } Effects;
 
         struct
@@ -116,7 +126,7 @@ namespace Sounds
         } Environment;
 
         s32* _SoundTime1 = (s32*)0x00d621b8; //TODO
-        s32* _SoundTimeUnknown1 = (s32*)0x00d61654; //TODO, looks like SoundMixMode, default value 1
+        s32* _UnknownSoundCount1 = (s32*)0x00d61654; //TODO, looks like SoundMixMode, default value 1
 
         AbstractSoundDeviceController** _SoundDeviceController = (AbstractSoundDeviceController**)0x00d62018; // TODO
         AbstractSoundRecordingDeviceController** _SoundRecordingDeviceController = (AbstractSoundRecordingDeviceController**)0x00d62a00; // TODO
@@ -125,7 +135,7 @@ namespace Sounds
 
         f32* _UnknownSoundEffectValue1 = (f32*)0x00d51c60; // TODO, looks like it is read-only and always zero
 
-        SoundEffectDescriptor* _SoundEffectDescriptor = (SoundEffectDescriptor*)0x00d56678; // TOOD array of 8
+        SoundEffectDescriptor* _SoundEffectDescriptors = (SoundEffectDescriptor*)0x00d56678; // TOOD array of 8
         s32* _SoundEffectDescriptorIndex = (s32*)0x00d56670;
     };
 
@@ -170,6 +180,8 @@ namespace Sounds
     void PushSoundEffectDescriptor(void);
     void LoadSoundSampleDescriptor(SoundSampleDescriptor* self);
     void SelectSoundEffectIndex(const s32 indx);
+    u32 UpdateSoundEffectPositionCount(const f64 x, const f64 y, const f64 z);
+    void ReleaseSounds(void);
 
     typedef const BOOL(CDECLAPI* FUN_005550E0) (void); // TODO
     static FUN_005550E0 FUN_005550e0 = (FUN_005550E0)0x005550e0;//TODO
