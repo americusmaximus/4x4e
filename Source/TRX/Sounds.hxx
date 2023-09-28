@@ -36,8 +36,8 @@ namespace Sounds
 
         struct
         {
-            s32* _Count = (s32*)0x00d621a4;//TODO
-            HANDLE* _Mutex = (HANDLE*)0x00d621b4;//TODO
+            s32* _Count = (s32*)0x00d621a4; // TODO
+            HANDLE Mutex; // 0x00d621b4 
         } Lock;
 
         struct
@@ -67,13 +67,13 @@ namespace Sounds
         {
             SoundEffect* _Cache = (SoundEffect*)0x00d51c70; // TODO array of 64
 
-            u32* _Index = (u32*)0x00d61650; // TODO
+            u32 Index; // 0x00d61650
 
             struct
             {
-                f32* _X = (f32*)0x00d615f0; // TODO array of 2
-                f32* _Y = (f32*)0x00d615f8; // TODO array of 2
-                f32* _Z = (f32*)0x00d61600; // TODO array of 2
+                f32 X[2]; // 0x00d615f0 // TODO
+                f32 Y[2]; // 0x00d615f8 // TODO
+                f32 Z[2]; // 0x00d61600 // TODO
             } Velocity;
 
             struct
@@ -102,18 +102,18 @@ namespace Sounds
 
             struct
             {
-                f64* _X = (f64*)0x00d615c0; // TODO array of 2
-                f64* _Y = (f64*)0x00d615d0; // TODO array of 2
-                f64* _Z = (f64*)0x00d615e0; // TODO array of 2
+                f64 X[2]; // 0x00d615c0 // TODO
+                f64 Y[2]; // 0x00d615d0 // TODO
+                f64 Z[2]; // 0x00d615e0 // TODO
             } Position;
 
             struct
             {
                 struct
                 {
-                    f64* _X = (f64*)0x00d620d8; // TODO array of 8
-                    f64* _Y = (f64*)0x00d62118; // TODO array of 8
-                    f64* _Z = (f64*)0x00d62158; // TODO array of 8
+                    f64 X[8]; // 0x00d620d8 // TODO
+                    f64 Y[8]; // 0x00d62118 // TODO
+                    f64 Z[8]; // 0x00d62158 // TODO
                 } Position;
             } Channels;
         } Effects;
@@ -126,7 +126,7 @@ namespace Sounds
         } Environment;
 
         s32* _SoundTime1 = (s32*)0x00d621b8; //TODO
-        s32* _UnknownSoundCount1 = (s32*)0x00d61654; //TODO, looks like SoundMixMode, default value 1
+        s32 UnknownSoundCount1 = 1; // 0x00d61654
 
         AbstractSoundDeviceController** _SoundDeviceController = (AbstractSoundDeviceController**)0x00d62018; // TODO
         AbstractSoundRecordingDeviceController** _SoundRecordingDeviceController = (AbstractSoundRecordingDeviceController**)0x00d62a00; // TODO
@@ -182,13 +182,10 @@ namespace Sounds
     void SelectSoundEffectIndex(const s32 indx);
     u32 UpdateSoundEffectPositionCount(const f64 x, const f64 y, const f64 z);
     void ReleaseSounds(void);
+    void UnlockSounds(const s32 value);
 
     typedef const BOOL(CDECLAPI* FUN_005550E0) (void); // TODO
     static FUN_005550E0 FUN_005550e0 = (FUN_005550E0)0x005550e0;//TODO
-    typedef const void(CDECLAPI* FUN_00559CF0) (void); // TODO
-    static FUN_00559CF0 FUN_00559cf0 = (FUN_00559CF0)0x00559cf0;//TODO
     typedef const void(CDECLAPI* FUN_0055CAD0) (SoundEffect*); // TODO
     static FUN_0055CAD0 FUN_0055cad0 = (FUN_0055CAD0)0x0055cad0;//TODO
-    typedef const BOOL(CDECLAPI* FUN_0055BAC0) (SoundEffect*, f32); // TODO
-    static FUN_0055BAC0 FUN_0055bac0 = (FUN_0055BAC0)0x0055bac0;//TODO
 }
