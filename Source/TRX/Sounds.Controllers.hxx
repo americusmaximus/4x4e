@@ -118,9 +118,9 @@ namespace Sounds
 
         u32* _Options = (u32*)0x00d621bc; // TODO enum
 
-        void** _UnknownMemory1 = (void**)0x00d6205c; // TODO
-        void** _UnknownMemory2 = (void**)0x00d62080; // TODO
-        void** _UnknownMemory3 = (void**)0x00d62038; // TODO
+        void* UnknownMemory1; // 0x00d6205c
+        void* UnknownMemory2; // 0x00d62080
+        void* UnknownMemory3; // 0x00d62038
 
         void** _UnknownArray1 = (void**)0x00d6203c; // TODO array of 8
         void** _UnknownArray2 = (void**)0x00d62084; // TODO array of 8
@@ -161,4 +161,6 @@ namespace Sounds
     void SelectSoundDeviceControllerVelocity(const f32 x, const f32 y, const f32 z);
     void SelectSoundDeviceControllerOrientation(const f32 x, const f32 y, const f32 z, const f32 xt, const f32 yt, const f32 zt, const f32 xf, const f32 yf, const f32 zf);
     void SelectSoundDeviceControllerPosition(const f64 x, const f64 y, const f64 z);
+
+    void AllocateSoundDeviceControllerMixBuffers(const u32 count, const s32 value);
 }

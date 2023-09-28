@@ -69,9 +69,9 @@ namespace Sounds
 
         GUID* uid = NULL;
 
-        if (!SoundDeviceState._EnumeratedDevices[indx].IsPrimary)
+        if (!SoundDeviceState.EnumeratedDevices[indx].IsPrimary)
         {
-            uid = &SoundDeviceState._EnumeratedDevices[indx].UID;
+            uid = &SoundDeviceState.EnumeratedDevices[indx].UID;
         }
 
         if (DSC(DirectSoundCreate(uid, &SoundDirectSoundSoundControllerState.DirectSound.Instance, NULL),
@@ -104,7 +104,7 @@ namespace Sounds
                 }
 
                 if (AcquireSoundMixMode2() == SoundMixMode::Advanced
-                    && SoundDeviceState._EnumeratedDevices[indx].MixMode == SoundMixMode::Advanced)
+                    && SoundDeviceState.EnumeratedDevices[indx].MixMode == SoundMixMode::Advanced)
                 {
                     SoundDirectSoundSoundControllerState.Buffers.Primary.Buffer->QueryInterface(
                         IID_IDirectSound3DListener, (void**)&SoundDirectSoundSoundControllerState.DirectSound.Listener);
@@ -135,10 +135,10 @@ namespace Sounds
             SoundDirectSoundSoundControllerState.DirectSound.Listener = NULL;
         }
 
-        if (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer != NULL)
+        if (SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer != NULL)
         {
-            (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer)->Release();
-            *SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer = NULL;
+            SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer->Release();
+            SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer = NULL;
         }
 
         if (SoundDirectSoundSoundControllerState.EAX.Instance != NULL)
@@ -165,9 +165,9 @@ namespace Sounds
     // 0x00555590
     BOOL StartSoundDirectSoundDeviceController(AbstractSoundDeviceController* self)
     {
-        f32 time = 0.1f;//TODO constant
+        f32 time = 0.1f; // TODO constant
 
-        if (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer != NULL)
+        if (SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer != NULL)
         {
             *SoundDirectSoundSoundControllerState.Buffers.Secondary._ChannelBufferSize =
                 (*SoundDirectSoundSoundControllerState.Buffers.Primary._BitsPerSample >> 3)
@@ -180,7 +180,7 @@ namespace Sounds
 
             for (u32 x = 0; x < *SoundDirectSoundSoundControllerState.Buffers.Secondary._Unknown1; x++)
             {
-                if (!FUN_005550e0())
+                if (!FillSoundDirectSoundDeviceControllerSecondaryBuffer())
                 {
                     self->Self->Stop(self);
 
@@ -191,12 +191,12 @@ namespace Sounds
 
         if (RestartSoundThread(time))
         {
-            if (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer == NULL) { return TRUE; }
+            if (SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer == NULL) { return TRUE; }
 
-            if (DSC((*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer)->SetCurrentPosition(0),
+            if (DSC(SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer->SetCurrentPosition(0),
                 "Unable to set secondary sound buffer playback position to 0.") == DS_OK)
             {
-                if (DSC((*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer)->Play(NULL, DSBPRIORITY_NONE, DSBPLAY_LOOPING),
+                if (DSC(SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer->Play(NULL, DSBPRIORITY_NONE, DSBPLAY_LOOPING),
                     "Unable to play secondary sound buffer.") == DS_OK)
                 {
                     return TRUE;
@@ -214,9 +214,9 @@ namespace Sounds
     {
         auto result = TRUE;
 
-        if (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer != NULL)
+        if (SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer != NULL)
         {
-            if (DSC((*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer)->Stop(),
+            if (DSC(SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer->Stop(),
                 "Unable to stop secondary sound buffer.") != DS_OK)
             {
                 result = FALSE;
@@ -380,14 +380,14 @@ namespace Sounds
                         .lpwfxFormat = &sf
                     };
 
-                    if (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer != NULL)
+                    if (SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer != NULL)
                     {
-                        (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer)->Release();
-                        *SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer = NULL;
+                        SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer->Release();
+                        SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer = NULL;
                     }
 
                     if (DSC(SoundDirectSoundSoundControllerState.DirectSound.Instance->CreateSoundBuffer(&sdesc,
-                        SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer, NULL),
+                        &SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer, NULL),
                         "Unable to create secondary sound buffer.") == DS_OK)
                     {
                         *count = *SoundDirectSoundSoundControllerState.Buffers.Secondary._Count;
@@ -398,10 +398,10 @@ namespace Sounds
             }
         }
 
-        if (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer != NULL)
+        if (SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer != NULL)
         {
-            (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer)->Release();
-            *SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer = NULL;
+            SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer->Release();
+            SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer = NULL;
         }
 
         return FALSE;
@@ -410,6 +410,7 @@ namespace Sounds
     // 0x00555ee0
     BOOL PollSoundDirectSoundDeviceController(AbstractSoundDeviceController* self)
     {
+        // Happy path in case the hardware supports mixing.
         if (AcquireSoundDeviceControllerMixMode() != SoundMixMode::None)
         {
             PollSoundDirectSoundSoundControllerSoundEffect();
@@ -417,12 +418,15 @@ namespace Sounds
             return TRUE;
         }
 
-        if (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer == NULL) { return FALSE; }
+        // In case the hardware does not support the hardware mixing,
+        // there is a need to perform sound mixing within the software manually.
+
+        if (SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer == NULL) { return FALSE; }
 
         DWORD play = 0;
         DWORD write = 0;
 
-        if (DSC((*SoundDirectSoundSoundControllerState.Buffers.Secondary._Buffer)->GetCurrentPosition(&play, &write),
+        if (DSC(SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer->GetCurrentPosition(&play, &write),
             "Unable to acquire secondary sound buffer position.") != DS_OK)
         {
             return FALSE;
@@ -440,8 +444,7 @@ namespace Sounds
         do
         {
             if (value == *SoundDirectSoundSoundControllerState.Buffers.Secondary._Unknown2) { return TRUE; }
-
-        } while (FUN_005550e0());
+        } while (FillSoundDirectSoundDeviceControllerSecondaryBuffer());
 
         return FALSE;
     }
@@ -1313,5 +1316,62 @@ namespace Sounds
         SoundDirectSoundSoundControllerState.SoundUnk0x24Array[indx].Unk3 = 0;
 
         return result;
+    }
+
+    typedef const void(CDECLAPI* FUN_00561460) (void**, u32, u32, u32, u32, u32); // TODO
+    static FUN_00561460 FUN_00561460a = (FUN_00561460)0x00561460; // TODO
+
+    // 0x005550e0
+    BOOL FillSoundDirectSoundDeviceControllerSecondaryBuffer(void)
+    {
+        if (SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer == NULL) { return FALSE; }
+
+        void* audio1;
+        DWORD audio1size;
+        void* audio2;
+        DWORD audio2size;
+
+        if (DSC(SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer->Lock(
+            *SoundDirectSoundSoundControllerState.Buffers.Secondary._Unknown2 * *SoundDirectSoundSoundControllerState.Buffers.Secondary._ChannelBufferSize,
+            *SoundDirectSoundSoundControllerState.Buffers.Secondary._ChannelBufferSize,
+            &audio1, &audio1size, &audio2, &audio2size, DSBLOCK_NONE),
+            "Unable to lock secondary sound buffer.") != DS_OK)
+        {
+            return FALSE;
+        }
+
+        if (audio2 == NULL && audio1size == *SoundDirectSoundSoundControllerState.Buffers.Secondary._ChannelBufferSize)
+        {
+            void* data[MAX_SOUND_CHANNEL_COUNT];
+
+            for (u32 x = 0; x < *SoundDirectSoundSoundControllerState.Buffers.Primary._Channels; x++)
+            {
+                data[x] = (void*)((addr)audio1 + (addr)(x * (*SoundDirectSoundSoundControllerState.Buffers.Primary._BitsPerSample >> 3)));
+            }
+
+            FUN_00561460a(data,
+                *SoundDirectSoundSoundControllerState.Buffers.Primary._BitsPerSample,
+                *SoundDirectSoundSoundControllerState.Buffers.Primary._Channels,
+                *SoundDirectSoundSoundControllerState.Buffers.Primary._HZ,
+                *SoundDirectSoundSoundControllerState.Buffers.Secondary._Count,
+                (*SoundDirectSoundSoundControllerState.Buffers.Primary._BitsPerSample >> 3) * *SoundDirectSoundSoundControllerState.Buffers.Primary._Channels);
+
+            *SoundDirectSoundSoundControllerState.Buffers.Secondary._Unknown2 = *SoundDirectSoundSoundControllerState.Buffers.Secondary._Unknown2 + 1;
+
+            if (*SoundDirectSoundSoundControllerState.Buffers.Secondary._Unknown1 <= *SoundDirectSoundSoundControllerState.Buffers.Secondary._Unknown2)
+            {
+                *SoundDirectSoundSoundControllerState.Buffers.Secondary._Unknown2 = 0;
+            }
+
+            if (DSC(SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer->Unlock(audio1, audio1size, audio2, audio2size),
+                "Unable to unlock secondary sound buffer.") != DS_OK)
+            {
+                return FALSE;
+            }
+
+            return TRUE;
+        }
+
+        return FALSE;
     }
 }

@@ -111,9 +111,9 @@ namespace Sounds
             {
                 struct
                 {
-                    f64 X[8]; // 0x00d620d8 // TODO
-                    f64 Y[8]; // 0x00d62118 // TODO
-                    f64 Z[8]; // 0x00d62158 // TODO
+                    f64 X[MAX_SOUND_CHANNEL_COUNT]; // 0x00d620d8
+                    f64 Y[MAX_SOUND_CHANNEL_COUNT]; // 0x00d62118
+                    f64 Z[MAX_SOUND_CHANNEL_COUNT]; // 0x00d62158
                 } Position;
             } Channels;
         } Effects;
@@ -184,8 +184,6 @@ namespace Sounds
     void ReleaseSounds(void);
     void UnlockSounds(const s32 value);
 
-    typedef const BOOL(CDECLAPI* FUN_005550E0) (void); // TODO
-    static FUN_005550E0 FUN_005550e0 = (FUN_005550E0)0x005550e0;//TODO
     typedef const void(CDECLAPI* FUN_0055CAD0) (SoundEffect*); // TODO
     static FUN_0055CAD0 FUN_0055cad0 = (FUN_0055CAD0)0x0055cad0;//TODO
 }
