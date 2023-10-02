@@ -39,6 +39,8 @@ SOFTWARE.
 #define DSBSTATUS_NONE 0
 #define DSBPRIORITY_NONE 0
 
+#define DEFAULT_DIRECT_SOUND_BUFFER_SIZE 1024
+
 using namespace App::Windows;
 using namespace Assets::Sounds;
 using namespace Logger;
@@ -256,23 +258,20 @@ namespace Sounds
 
         if (SoundDirectSoundSoundControllerState.Buffers.Primary.Buffer != NULL)
         {
-            const auto alignment = (bits >> 3) * channels;
-
             WAVEFORMATEX pf =
             {
                 .wFormatTag = WAVE_FORMAT_PCM,
                 .nChannels = channels,
                 .nSamplesPerSec = hz,
-                .nAvgBytesPerSec = hz * alignment,
-                .nBlockAlign = (WORD)alignment,
+                .nAvgBytesPerSec = hz * (channels * (bits >> 3)),
+                .nBlockAlign = (WORD)(channels * (bits >> 3)),
                 .wBitsPerSample = (WORD)bits
             };
 
             if (DSC(SoundDirectSoundSoundControllerState.Buffers.Primary.Buffer->SetFormat(&pf),
                 "Unable to set primary sound buffer format.") == DS_OK)
             {
-                if (DSC(SoundDirectSoundSoundControllerState.Buffers.Primary.Buffer->GetFormat(
-                    &pf, sizeof(WAVEFORMATEX), NULL),
+                if (DSC(SoundDirectSoundSoundControllerState.Buffers.Primary.Buffer->GetFormat(&pf, sizeof(WAVEFORMATEX), NULL),
                     "Unable to get primary sound buffer format.") == DS_OK)
                 {
                     *SoundDirectSoundSoundControllerState.Buffers.Primary._BitsPerSample = pf.wBitsPerSample;
@@ -288,18 +287,18 @@ namespace Sounds
                     WAVEFORMATEX tbf =
                     {
                         .wFormatTag = WAVE_FORMAT_PCM,
-                        .nChannels = 1, // TODO constant
-                        .nSamplesPerSec = 22050, // TODO constant
-                        .nAvgBytesPerSec = 22050 * 2, // TODO constant
-                        .nBlockAlign = 2, // TODO constant
-                        .wBitsPerSample = 16 // TODO constant
+                        .nChannels = SOUND_CHANNEL_COUNT_MONO,
+                        .nSamplesPerSec = SOUND_FREQUENCY_22050,
+                        .nAvgBytesPerSec = SOUND_FREQUENCY_22050 * SOUND_BYTES_2,
+                        .nBlockAlign = SOUND_BYTES_2,
+                        .wBitsPerSample = SOUND_BITS_16
                     };
 
                     DSBUFFERDESC tbd =
                     {
                         .dwSize = sizeof(DSBUFFERDESC),
                         .dwFlags = DSBCAPS_CTRL3D | DSBCAPS_STATIC,
-                        .dwBufferBytes = 1024, // TODO constant
+                        .dwBufferBytes = DEFAULT_DIRECT_SOUND_BUFFER_SIZE,
                         .lpwfxFormat = &tbf
                     };
 
@@ -363,21 +362,11 @@ namespace Sounds
 
                     *SoundDirectSoundSoundControllerState.Buffers.Secondary._ChannelBufferSize = align * *SoundDirectSoundSoundControllerState.Buffers.Secondary._Count;
 
-                    WAVEFORMATEX sf =
-                    {
-                        .wFormatTag = WAVE_FORMAT_PCM,
-                        .nChannels = 2, // TODO constant
-                        .nSamplesPerSec = 44100, // TODO constant
-                        .nAvgBytesPerSec = 44100 * align, // TODO constant
-                        .nBlockAlign = (WORD)align,
-                        .wBitsPerSample = 16 // TODO constant
-                    };
-
                     DSBUFFERDESC sdesc =
                     {
                         .dwSize = sizeof(DSBUFFERDESC),
                         .dwBufferBytes = *SoundDirectSoundSoundControllerState.Buffers.Secondary._Unknown1 * *SoundDirectSoundSoundControllerState.Buffers.Secondary._ChannelBufferSize,
-                        .lpwfxFormat = &sf
+                        .lpwfxFormat = &pf
                     };
 
                     if (SoundDirectSoundSoundControllerState.Buffers.Secondary.Buffer != NULL)
