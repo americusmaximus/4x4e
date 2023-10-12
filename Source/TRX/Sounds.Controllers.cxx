@@ -30,7 +30,10 @@ SOFTWARE.
 #include "Sounds.Devices.hxx"
 #include "Sounds.Effects.hxx"
 #include "Sounds.hxx"
+#include "Sounds.Samples.hxx"
 #include "Time.hxx"
+
+#include <math.h>
 
 using namespace Logger;
 using namespace Memory;
@@ -287,7 +290,7 @@ namespace Sounds
 
                 PollSoundDeviceControllerSoundSamples(FALSE);
 
-                *SoundState.Lock._Count = *SoundState.Lock._Count + -1;
+                *SoundState.Lock._Count = *SoundState.Lock._Count - 1;
 
                 DisposeMutex(SoundState.Lock.Mutex);
             }
@@ -335,7 +338,7 @@ namespace Sounds
 
             if (effect->Options == 0) { continue; } // TODO constant
 
-            ComputeSoundEffect(effect, 0.0f); // TODO constant
+            ComputeSoundEffect(effect, MIN_SOUND_VOLUME);
 
             if (!(*SoundState._SoundDeviceController)->Self->SelectSoundEffectOptions(*SoundState._SoundDeviceController, effect, effect->Options))
             {
@@ -369,12 +372,12 @@ namespace Sounds
                 SoundState.Effects.Orientation.XYZ._X[SoundState.Effects.Index],
                 SoundState.Effects.Orientation.XYZ._Y[SoundState.Effects.Index],
                 SoundState.Effects.Orientation.XYZ._Z[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Top._X[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Top._Y[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Top._Z[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Front._X[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Front._Y[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Front._Z[SoundState.Effects.Index]);
+                SoundState.Effects.Orientation.Top.X[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Top.Y[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Top.Z[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Front.X[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Front.Y[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Front.Z[SoundState.Effects.Index]);
         }
 
         if ((*SoundDeviceControllerState._Options & 4) != 0) // TODO constant
@@ -394,13 +397,10 @@ namespace Sounds
     // a.k.a. setSoundOutputMode
     BOOL SelectSoundDeviceControllerSoundMode(const u32 bits, const u32 channels, const u32 hz)
     {
-        if (AcquireSoundDeviceControllerActiveState())
-        {
-            LogError("Unable to select sound output mode, the device is already active.");
-        }
+        if (AcquireSoundDeviceControllerActiveState()) { LogError("Unable to select sound output mode, the device is already active."); }
 
         *SoundState.Options._Bits = bits;
-        *SoundState.Options._ChannelCount = channels;
+        *SoundState.Options._Channels = channels;
         *SoundState.Options._HZ = hz;
 
         if (*SoundState._SoundDeviceController != NULL)
@@ -426,11 +426,11 @@ namespace Sounds
 
         LockSounds();
 
-        if (SelectSoundDeviceControllerSoundMode(*SoundState.Options._Bits, *SoundState.Options._ChannelCount, *SoundState.Options._HZ))
+        if (SelectSoundDeviceControllerSoundMode(*SoundState.Options._Bits, *SoundState.Options._Channels, *SoundState.Options._HZ))
         {
             if (0 < *SoundDeviceControllerState._Unknown1)
             {
-                for (u32 x = 0; x < *SoundState.Options._ChannelCount; x++)
+                for (u32 x = 0; x < *SoundState.Options._Channels; x++)
                 {
                     ZeroMemory(SoundDeviceControllerState._UnknownArray4[x],
                         *SoundDeviceControllerState._Unknown4 * *SoundDeviceControllerState._Unknown1 * 4); // TODO constant
@@ -449,22 +449,22 @@ namespace Sounds
                 SoundState.Effects.Orientation.XYZ._X[SoundState.Effects.Index],
                 SoundState.Effects.Orientation.XYZ._Y[SoundState.Effects.Index],
                 SoundState.Effects.Orientation.XYZ._Z[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Top._X[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Top._Y[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Top._Z[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Front._X[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Front._Y[SoundState.Effects.Index],
-                SoundState.Effects.Orientation.Front._Z[SoundState.Effects.Index]);
+                SoundState.Effects.Orientation.Top.X[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Top.Y[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Top.Z[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Front.X[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Front.Y[SoundState.Effects.Index],
+                SoundState.Effects.Orientation.Front.Z[SoundState.Effects.Index]);
 
             (*SoundState._SoundDeviceController)->Self->SelectVelocity(*SoundState._SoundDeviceController,
                 SoundState.Effects.Velocity.X[SoundState.Effects.Index],
                 SoundState.Effects.Velocity.Y[SoundState.Effects.Index],
                 SoundState.Effects.Velocity.Z[SoundState.Effects.Index]);
 
-            (*SoundState._SoundDeviceController)->Self->SelectDistanceFactor(*SoundState._SoundDeviceController, 1.0f);
+            (*SoundState._SoundDeviceController)->Self->SelectDistanceFactor(*SoundState._SoundDeviceController, SoundDeviceControllerState.DistanceFactor.Value);
 
             (*SoundState._SoundDeviceController)->Self->SelectEnvironment(*SoundState._SoundDeviceController,
-                *SoundState.Environment._Volume, *SoundState.Environment._Time, *SoundState.Environment._Damping);
+                SoundState.Environment.Volume, SoundState.Environment.Time, SoundState.Environment.Damping);
 
             *SoundState._SoundTime1 = AcquireTime();
 
@@ -506,13 +506,13 @@ namespace Sounds
         SoundState.Effects.Orientation.XYZ._Y[SoundState.Effects.Index] = y;
         SoundState.Effects.Orientation.XYZ._Z[SoundState.Effects.Index] = z;
 
-        SoundState.Effects.Orientation.Top._X[SoundState.Effects.Index] = xt;
-        SoundState.Effects.Orientation.Top._Y[SoundState.Effects.Index] = yt;
-        SoundState.Effects.Orientation.Top._Z[SoundState.Effects.Index] = zt;
+        SoundState.Effects.Orientation.Top.X[SoundState.Effects.Index] = xt;
+        SoundState.Effects.Orientation.Top.Y[SoundState.Effects.Index] = yt;
+        SoundState.Effects.Orientation.Top.Z[SoundState.Effects.Index] = zt;
 
-        SoundState.Effects.Orientation.Front._X[SoundState.Effects.Index] = xf;
-        SoundState.Effects.Orientation.Front._Y[SoundState.Effects.Index] = yf;
-        SoundState.Effects.Orientation.Front._Z[SoundState.Effects.Index] = zf;
+        SoundState.Effects.Orientation.Front.X[SoundState.Effects.Index] = xf;
+        SoundState.Effects.Orientation.Front.Y[SoundState.Effects.Index] = yf;
+        SoundState.Effects.Orientation.Front.Z[SoundState.Effects.Index] = zf;
 
         *SoundDeviceControllerState._Options = *SoundDeviceControllerState._Options | 0x20000000; // TODO constant
 
@@ -548,18 +548,181 @@ namespace Sounds
         *SoundDeviceControllerState._Unknown2 = 0;
         *SoundDeviceControllerState._Unknown3 = 0;
 
-        SoundDeviceControllerState.UnknownMemory1 = ReallocateMemory(SoundDeviceControllerState.UnknownMemory1, *SoundDeviceControllerState._Unknown4 * 4 * value * *SoundState.Options._ChannelCount); // TODO constant
-        SoundDeviceControllerState.UnknownMemory2 = ReallocateMemory(SoundDeviceControllerState.UnknownMemory2, 2 * *SoundDeviceControllerState._Unknown4 * 4 * *SoundState.Options._ChannelCount); // TODO constants
-        SoundDeviceControllerState.UnknownMemory3 = ReallocateMemory(SoundDeviceControllerState.UnknownMemory3, *SoundDeviceControllerState._Unknown4 * 4 * *SoundState.Options._ChannelCount); // TODO constant
+        SoundDeviceControllerState.UnknownMemory1 = ReallocateMemory(SoundDeviceControllerState.UnknownMemory1, *SoundDeviceControllerState._Unknown4 * 4 * value * *SoundState.Options._Channels); // TODO constant
+        SoundDeviceControllerState.UnknownMemory2 = ReallocateMemory(SoundDeviceControllerState.UnknownMemory2, 2 * *SoundDeviceControllerState._Unknown4 * 4 * *SoundState.Options._Channels); // TODO constants
+        SoundDeviceControllerState.UnknownMemory3 = ReallocateMemory(SoundDeviceControllerState.UnknownMemory3, *SoundDeviceControllerState._Unknown4 * 4 * *SoundState.Options._Channels); // TODO constant
 
         if (SoundDeviceControllerState.UnknownMemory1 == NULL || SoundDeviceControllerState.UnknownMemory2 == NULL || SoundDeviceControllerState.UnknownMemory3 == NULL) { LogError("Unable to allocate sound mix buffers memory."); }
 
-        for (u32 x = 0; x < *SoundState.Options._ChannelCount; x++)
+        for (u32 x = 0; x < *SoundState.Options._Channels; x++)
         {
             SoundDeviceControllerState._UnknownArray4[x] = (void*)((addr)SoundDeviceControllerState.UnknownMemory1 + (addr)(x * *SoundDeviceControllerState._Unknown4 * *SoundDeviceControllerState._Unknown1 * 4)); // TODO constant
-            SoundDeviceControllerState._UnknownArray1[x] = (void*)((addr)SoundDeviceControllerState.UnknownMemory3 + (addr)(x * *SoundDeviceControllerState._Unknown4 * 4)); // TODO constant
+            SoundDeviceControllerState._UnknownArray1[x] = (f32*)((addr)SoundDeviceControllerState.UnknownMemory3 + (addr)(x * *SoundDeviceControllerState._Unknown4 * sizeof(f32)));
             SoundDeviceControllerState._UnknownArray2[x] = (void*)((addr)SoundDeviceControllerState.UnknownMemory2 + (addr)(x * *SoundDeviceControllerState._Unknown4 * 4 * 2)); // TODO constant
             SoundDeviceControllerState._UnknownArray3[x] = (void*)((addr)SoundDeviceControllerState.UnknownMemory2 + (addr)(x * *SoundDeviceControllerState._Unknown4 * 4 * 2)); // TODO constant
         }
+    }
+
+    typedef const void(CDECLAPI* FUN_0055BFB0) (SoundEffect*, SoundEffectMixContainer); // TODO
+    static FUN_0055BFB0 FUN_0055bfb0 = (FUN_0055BFB0)0x0055bfb0; // TODO
+
+    // 0x00561460
+    void FillSoundDeviceControllerBuffer(void** data, const u32 bits, const u32 channels, const u32 hz, const u32 count, const u32 length)
+    {
+        if (*SoundState.Lock._Count < DEFAULT_SOUND_LOCK_COUNT) { LogError("Unable to fill sound buffer, sounds must be locked."); }
+
+        for (u32 x = 0; x < channels; x++) { if (SoundDeviceControllerState._UnknownArray4[x] == NULL) { return; } }
+
+        if (bits != *SoundState.Options._Bits || channels != *SoundState.Options._Channels || hz != *SoundState.Options._HZ) { return; }
+
+        ComputeSoundEffectsPositions();
+
+        void* values[MAX_SOUND_CHANNEL_COUNT];
+
+        for (u32 x = 0; x < channels; x++) { values[x] = data[x]; }
+
+        s32 value = 0; // TODO name
+        for (u32 x = count; 0 < x; x = x - value) // TODO: make this loop more readable.
+        {
+            // Check if the next mixing buffer has no data.
+            if (*SoundDeviceControllerState._Unknown2 < 1)
+            {
+                if (*SoundState.Lock._Count < DEFAULT_SOUND_LOCK_COUNT) { LogError("Unable to fill sound channel buffer, sounds must be locked."); }
+
+                if (0 < *SoundDeviceControllerState._Unknown2) { LogError("Next mixing buffer contains data."); }
+
+                {
+                    const auto chunk = *SoundDeviceControllerState._Unknown4 * 4; // TODO constant
+                    const auto len = chunk * (*SoundDeviceControllerState._Unknown1 - 1); // TODO constant
+
+                    for (u32 xx = 0; xx < *SoundState.Options._Channels; xx++)
+                    {
+                        memmove(SoundDeviceControllerState._UnknownArray4[xx],
+                            (void*)((addr)SoundDeviceControllerState._UnknownArray4[xx] + (addr)chunk), len);
+
+                        ZeroMemory((void*)((addr)SoundDeviceControllerState._UnknownArray4[xx] + (addr)len), chunk);
+                    }
+                }
+
+                SoundEffectMixContainer container =
+                {
+                    .Length = *SoundDeviceControllerState._Unknown4,
+                    .Channels = *SoundState.Options._Channels,
+                    .HZ = *SoundState.Options._HZ
+                };
+
+                for (u32 xx = 0; xx < *SoundState.Options._Channels; xx++) { container.Data[xx] = (f32*)SoundDeviceControllerState._UnknownArray4[xx]; }
+
+                for (u32 xx = 0; xx < 64; xx++) { ComputeSoundEffect(&SoundState.Effects._Cache[xx], *SoundDeviceControllerState._Unknown4 / (f32)*SoundState.Options._HZ); }
+
+                for (u32 xx = 0; xx < 64; xx++)
+                {
+                    // TODO MixSoundEffect(&SoundState.Effects._Cache[xx], container);
+                    FUN_0055bfb0(&SoundState.Effects._Cache[xx], container);
+                } // TODO
+
+                *SoundDeviceControllerState._Unknown2 = *SoundDeviceControllerState._Unknown4;
+                *SoundDeviceControllerState._Unknown5 = *SoundDeviceControllerState._Unknown5 + 1;
+                *SoundDeviceControllerState._Unknown3 = 0;
+            }
+
+            value = *SoundDeviceControllerState._Unknown2;
+            if (x < *SoundDeviceControllerState._Unknown2) { value = x; }
+
+            for (u32 xx = 0; xx < channels; xx++)
+            {
+                auto payload = (f32*)((addr)SoundDeviceControllerState._UnknownArray4[xx] + (addr)(*SoundDeviceControllerState._Unknown3 * 4)); // TODO constants
+
+                ConvertSoundControllerMixBuffer(payload, values[xx], bits, value, length);
+
+                values[xx] = (void*)((addr)values[xx] + (addr)(value * length));
+            }
+
+            *SoundDeviceControllerState._Unknown2 = *SoundDeviceControllerState._Unknown2 - value;
+            *SoundDeviceControllerState._Unknown3 = *SoundDeviceControllerState._Unknown3 + value;
+        }
+    }
+
+    // 0x0055e820
+    void SelectSoundDeviceControllerDistanceFactor(const f32 value)
+    {
+        SoundDeviceControllerState.DistanceFactor.InverseValue = DEFAULT_DISTANCE_FACTOR_VALUE / value;
+        SoundDeviceControllerState.DistanceFactor.Value = value;
+
+        if (*SoundState._SoundDeviceController != NULL)
+        {
+            (*SoundState._SoundDeviceController)->Self->SelectDistanceFactor(*SoundState._SoundDeviceController, value);
+        }
+    }
+
+    // 0x0055ff30
+    void SelectSoundDeviceControllerEnvironment(const f32 volume, const f32 time, const f32 damping)
+    {
+        SoundState.Environment.Volume = volume;
+        SoundState.Environment.Time = time;
+        SoundState.Environment.Damping = damping;
+
+        if (*SoundState._SoundDeviceController != NULL)
+        {
+            (*SoundState._SoundDeviceController)->Self->SelectEnvironment(*SoundState._SoundDeviceController, volume, time, damping);
+        }
+    }
+
+    // 0x0055a3a0
+    // a.k.a. convertMixBufToOutput
+    void ConvertSoundControllerMixBuffer(const f32* input, void* output, const u32 bits, const u32 count, const u32 pitch)
+    {
+        if (bits != SOUND_BITS_8 && bits != SOUND_BITS_16) { LogError("Unable to convert mix buffer, invalid bits %d.", bits); } // TODO consts
+
+        if (bits == SOUND_BITS_8) // Convert the float inputs to a range of [0..255].
+        {
+            for (u32 x = 0; x < count; x++)
+            {
+                const auto value = input[x];
+
+                auto out = (u8*)((addr)output + (addr)(x * pitch));
+
+                if (value < -1.0f) // TODO constant
+                {
+                    out[0] = U8_MIN;
+                }
+                else if (value < 1.0f) // TODO constant
+                {
+                    out[0] = (u8)round(value * 127.0f + 128.0f); // TODO constants
+                }
+                else
+                {
+                    out[0] = U8_MAX - 1;
+                }
+            }
+        }
+        else if (bits == SOUND_BITS_16) // Convert the float inputs to a range of [-32767..32767].
+        {
+            for (u32 x = 0; x < count; x++)
+            {
+                const auto value = input[x];
+
+                auto out = (s16*)((addr)output + (addr)(x * pitch));
+
+                if (value < -1.0f) // TODO constant
+                {
+                    out[0] = S16_MIN + 1;
+                }
+                else if (value < 1.0f) // TODO constant
+                {
+                    out[0] = (s16)round(value * 32766.0f); // TODO constants
+                }
+                else
+                {
+                    out[0] = S16_MAX;
+                }
+            }
+        }
+    }
+
+    // 0x0055ff20
+    s32 AcquireSoundDeviceControllerUnknown5(void)
+    {
+        return *SoundDeviceControllerState._Unknown5;
     }
 }

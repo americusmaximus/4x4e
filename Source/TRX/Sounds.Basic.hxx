@@ -42,6 +42,13 @@ SOFTWARE.
 
 #define MAX_SOUND_CHANNEL_COUNT 8
 
+#define MIN_SOUND_USER_DATA_COUNT 0
+#define MAX_SOUND_USER_DATA_COUNT 2
+
+#define MIN_SOUND_LATENCY (0.05f)
+#define DEFAULT_SOUND_LATENCY (0.5f)
+#define MAX_SOUND_LATENCY (2.0f)
+
 #define SOUND_DIRECTORY_NAME "sound"
 
 // NOTE: klp is a legacy metadata file used in earlier games.
@@ -81,7 +88,7 @@ namespace Sounds
         f32 MinimumDistance;
         f32 MaximumDistance;
 
-        void* AllocatedMemory1;
+        void* AllocatedMemory1; // TODO name
 
         SoundLoopMode LoopMode;
         s32 ChannelLength[2]; // TODO
@@ -89,8 +96,10 @@ namespace Sounds
         s32 Unk106; // TODO
         s32 Unk107; // TODO
         s32 Unk108; // TODO
-        s32 Unk6; // TODO, may be an enum
-        s32 Unk109; // TODO
+
+        s32 Unk6; // TODO size, may be an enum
+        s32 Unk7; // TODO
+
         s32 Unk110; // TODO
         s32 Unk111; // TODO
         s32 Unk112; // TODO
@@ -125,29 +134,46 @@ namespace Sounds
         } Lock;
     };
 
+    // TODO name
+    enum class SoundEffectDescriptorUnknownType : u32
+    {
+        None = 0,
+        Single = 1,
+        Double = 2
+    };
+
+    // TODO name
+    struct SoundEffectDescriptorUnknown
+    {
+        union
+        {
+            f32x3* Single;
+            f64x3* Double;
+        };
+
+        SoundEffectDescriptorUnknownType Type;
+    };
+
+    // a.k.a. SfxOptions
     struct SoundEffectDescriptor
     {
         s32 NextChannelIndex; // TODO better name
         s32 Unknown101; // TODO
         f64x3 Location;
 
-        // NOTE, this also can be f64x3 (see ComputeSoundEffectLocationVelocity)
-        f32x3* Unknown102; // TODO
-        s32 Unknown103; // TODO
+        SoundEffectDescriptorUnknown Unknown102;
 
         f32x3 Velocity;
 
-        // NOTE, this also can be f64x3 + int (see ComputeSoundEffectLocationVelocity)
-        f32x3* Unknown104; // TODO
-        s32 Unknown105; // TODO
+        SoundEffectDescriptorUnknown Unknown104;
 
         f32 Volume;
         f32 HZ; // TODO
         f32 RemainingDelay;
-        s32 Unknown1002[2]; // TODO
+        void* UserData[MAX_SOUND_USER_DATA_COUNT]; // TODO
         u32 Unk30;// TODO enum
         s32 Unknown1004; // TODO
-        f64 Unknown1005; // TODO
+        f64 Position; // Linear position within the timeline of the sound effect.
         s32 Unknown1007; // TODO
         s32 Unknown1008; // TODO
     };
@@ -180,7 +206,7 @@ namespace Sounds
         f32 MaximumDistance;
 
         f32 Unknown1002; // TODO
-        f32 Unknown1003; // TODO
+        f32 Volume;
         s32 Unknown1004; // TODO
 
         BOOL DebugMode;
@@ -192,5 +218,14 @@ namespace Sounds
         s32 Unknown104; // TODO
 
         u32 Options; // TODO: flags
+    };
+
+    struct SoundEffectMixContainer
+    {
+        f32* Data[MAX_SOUND_CHANNEL_COUNT];
+
+        u32 Length;
+        u32 Channels;
+        u32 HZ;
     };
 }

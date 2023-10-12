@@ -24,9 +24,17 @@ SOFTWARE.
 #include "Native.Basic.hxx"
 #include "Sounds.Controllers.hxx"
 
+#define MIN_SOUND_EFFECT_CHANNEL_COUNT 0
+#define MAX_SOUND_EFFECT_CHANNEL_COUNT 32
+
+#define MIN_SOUND_LOCK_COUNT 0
+#define DEFAULT_SOUND_LOCK_COUNT 1
 #define MAX_SOUND_LOCK_COUNT 100
 
 #define MAX_SOUND_THREAD_ACTION_ITERATION_COUNT 100
+
+#define MIN_SOUND_VOLUME (0.0f)
+#define MAX_SOUND_VOLUME (1.0f)
 
 namespace Sounds
 {
@@ -40,20 +48,15 @@ namespace Sounds
             HANDLE Mutex; // 0x00d621b4 
         } Lock;
 
-        struct
-        {
-            f32* ChannelVolumes1 = (f32*)0x00d61658; // TODO MAX_SOUND_SFX_CHANNEL_COUNT  (32)
-        } SFX;
-
         BOOL* _SoundChannelStates = (BOOL*)0x00d616d8; // TODO ARRAY of 32
 
         struct
         {
-            u32* _Bits = (u32*)0x005ff558; // TODO, default value 16
-            u32* _ChannelCount = (u32*)0x005ff55c; // TODO, default value 2
-            u32* _HZ = (u32*)0x005ff560; // TODO, default value 22050
+            u32* _Bits = (u32*)0x005ff558; // TODO, default value SOUND_BITS_16
+            u32* _Channels = (u32*)0x005ff55c; // TODO, default value SOUND_CHANNEL_COUNT_STEREO
+            u32* _HZ = (u32*)0x005ff560; // TODO, default value SOUND_FREQUENCY_22050
 
-            f32* _MaximumSoftWareLatency = (f32*)0x005ff584;//todo, default value 0.5f;
+            f32* _MaximumSoftWareLatency = (f32*)0x005ff584;//todo, default value DEFAULT_SOUND_LATENCY
         } Options;
 
         struct
@@ -87,16 +90,16 @@ namespace Sounds
 
                 struct
                 {
-                    f32* _X = (f32*)0x00d61620; // TODO array of 2
-                    f32* _Y = (f32*)0x00d61628; // TODO array of 2
-                    f32* _Z = (f32*)0x00d61630; // TODO array of 2
+                    f32 X[2]; // 0x00d61620 // TODO
+                    f32 Y[2]; // 0x00d61628 // TODO
+                    f32 Z[2]; // 0x00d61630 // TODO
                 } Top;
 
                 struct
                 {
-                    f32* _X = (f32*)0x00d61638; // TODO array of 2
-                    f32* _Y = (f32*)0x00d61640; // TODO array of 2
-                    f32* _Z = (f32*)0x00d61648; // TODO array of 2
+                    f32 X[2]; // 0x00d61638 // TODO
+                    f32 Y[2]; // 0x00d61640 // TODO
+                    f32 Z[2]; // 0x00d61648 // TODO
                 } Front;
             } Orientation;
 
@@ -114,15 +117,20 @@ namespace Sounds
                     f64 X[MAX_SOUND_CHANNEL_COUNT]; // 0x00d620d8
                     f64 Y[MAX_SOUND_CHANNEL_COUNT]; // 0x00d62118
                     f64 Z[MAX_SOUND_CHANNEL_COUNT]; // 0x00d62158
-                } Position;
+                } Position; // TODO move around
+
+                // NOTE: used from somewhere unknown
+                f32* _Volumes = (f32*)0x00d61658; // TODO MAX_SOUND_SFX_CHANNEL_COUNT  (32)
+
+                u32* _Count = (u32*)0x005ff554; // TODO, default value MAX_SOUND_EFFECT_CHANNEL_COUNT, move to Options?
             } Channels;
         } Effects;
 
         struct
         {
-            f32* _Volume = (f32*)0x00d62198; // TODO
-            f32* _Time = (f32*)0x00d6219c; // TODO
-            f32* _Damping = (f32*)0x00d621a0; // TODO
+            f32 Volume; // 0x00d62198
+            f32 Time; // 0x00d6219c
+            f32 Damping; // 0x00d621a0
         } Environment;
 
         s32* _SoundTime1 = (s32*)0x00d621b8; //TODO
@@ -132,7 +140,7 @@ namespace Sounds
         AbstractSoundRecordingDeviceController** _SoundRecordingDeviceController = (AbstractSoundRecordingDeviceController**)0x00d62a00; // TODO
 
         SoundSample* _SoundEffectSamples = (SoundSample*)0x00d569bc; // TODO 64 elements, todo name
-
+        s32* _SoundEffectIndex = (s32*)0x00d569b8; // TODO
         f32* _UnknownSoundEffectValue1 = (f32*)0x00d51c60; // TODO, looks like it is read-only and always zero
 
         SoundEffectDescriptor* _SoundEffectDescriptors = (SoundEffectDescriptor*)0x00d56678; // TOOD array of 8
@@ -141,47 +149,23 @@ namespace Sounds
 
     extern SoundContainer SoundState;
 
+    BOOL RestartSoundThread(const f32 value);
+    BOOL StopSoundThread(void);
+    DWORD WINAPI StartSoundThread(LPVOID);
+    f32 AcquireMaximumSoftWareSoundLatency(void);
+    f64 AcquireUnknownSoundValue101(const f64 value);
+    SoundMixMode AcquireSoundMixMode2(void);
+    u32 AcquireSoundChannelCount(void);
+    u32 AcquireSoundOutputBitsOptions(void);
+    u32 AcquireSoundOutputFrequencyOptions(void);
+    void AcquireSoundOutputOptions(u32* bits, u32* channels, u32* hz);
     void LockSounds(void);
+    void ReleaseSounds(void);
+    void SelectMaximumSoftWareLatency(const f32 value);
+    void SelectSoundMixMode(const SoundMixMode mode);
     void UnlockSound1(void);
     void UnlockSound2(void);
     void UnlockSound3(void);
-
-    SoundMixMode AcquireSoundMixMode2(void);
-    void SelectSoundMixMode(const SoundMixMode mode);
-
-    BOOL RestartSoundThread(const f32 value);
-    DWORD WINAPI StartSoundThread(LPVOID);
-    BOOL StopSoundThread(void);
-
-    f32 AcquireMaximumSoftWareSoundLatency(void);
-    void SelectMaximumSoftWareLatency(const f32 value);
-
-    u32 AcquireSoundChannelCount(void);
-    f32 AcquireSoundEffectChannelVolume(const s32 indx);
-    void AcquireSoundOutputOptions(u32* bits, u32* channels, u32* hz);
-    f64 AcquireUnknownSoundValue101(const f64 value);
-    s32 AcquireSoundSampleDescriptorValue204(SoundSampleDescriptor* self, const s32 offset);
-    BOOL AcquireSoundEffectChannelState(const s32 indx);
-    void SelectSoundEffectChannelState(const s32 indx, const BOOL value);
-
-    void DisposeSoundSample(SoundSample* self);
-    void ReleaseSoundEffectSamples(void);
-    void DisposeSoundEffect(SoundEffect* self);
-    void ReleaseSoundSampleMemory(SoundSample* self);
-    void SelectSoundEffectChannelVolume(const s32 indx, const f32 volume);
-    void* LockSoundSample(SoundSample* self, const s32 offset, const s32 length);
-    void UnlockSoundSample(SoundSample* self);
-    s32 AcquireSoundSampleDescriptorOffset(SoundSampleDescriptor* self, const s32 offset);
-    BOOL PollSoundEffectStream(SoundEffect* self);
-    void UpdateSoundEffectPosition(SoundEffect* self, const f64 position);
-    u32 AcquireUnknownSoundSampleDescriptorValue1(SoundSampleDescriptor* self);
-    void InitializeSoundEffectDescriptor(SoundEffectDescriptor* self);
-    void PopSoundEffectDescriptor(void);
-    void PushSoundEffectDescriptor(void);
-    void LoadSoundSampleDescriptor(SoundSampleDescriptor* self);
-    void SelectSoundEffectIndex(const s32 indx);
-    u32 UpdateSoundEffectPositionCount(const f64 x, const f64 y, const f64 z);
-    void ReleaseSounds(void);
     void UnlockSounds(const s32 value);
 
     typedef const void(CDECLAPI* FUN_0055CAD0) (SoundEffect*); // TODO

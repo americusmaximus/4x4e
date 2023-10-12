@@ -42,10 +42,10 @@ namespace Sounds
     {
         ZeroMemory(&self->Descriptor, sizeof(SoundSampleDescriptor));
 
-        self->Descriptor.ReferenceDistance = 20.0f; // TODO constant
+        self->Descriptor.ReferenceDistance = 20.0f * SoundDeviceControllerState.DistanceFactor.InverseValue; // TODO constant
 
-        self->Descriptor.MinimumDistance = *SoundState._UnknownSoundEffectValue1;
-        self->Descriptor.MaximumDistance = 10000.0f; // TODO constant
+        self->Descriptor.MinimumDistance = *SoundState._UnknownSoundEffectValue1 * SoundDeviceControllerState.DistanceFactor.InverseValue;
+        self->Descriptor.MaximumDistance = 10000.0f * SoundDeviceControllerState.DistanceFactor.InverseValue; // TODO constant
 
         ConstructInStreamFile(&self->Stream);
 
@@ -81,10 +81,7 @@ namespace Sounds
     // a.k.a. freeMemory
     void DisposeSoundSample(SoundSample* self)
     {
-        if (self->Descriptor.Priority != 0)
-        {
-            LogError("Unable to release sound effect sample, it is currently in use.");
-        }
+        if (self->Descriptor.Priority != 0) { LogError("Unable to release sound effect sample, it is currently in use."); }
 
         UnlockSoundSample(self);
         ReleaseSoundSampleMemory(self);
@@ -104,7 +101,6 @@ namespace Sounds
         self->Unk6 = 0;
         self->Length = 0;
         self->AllocatedMemorySize = 0;
-
         self->Unk7 = -1; // TODO constant
     }
 
@@ -164,5 +160,26 @@ namespace Sounds
 
         self->Lock.Offset = 0;
         self->Lock.Length = 0;
+    }
+
+    // 000558a70
+    SoundSample* AcquireCurrentSoundEffectSample(void)
+    {
+        for (u32 x = 0; x < 64; x++) // TODO constant
+        {
+            *SoundState._SoundEffectIndex = *SoundState._SoundEffectIndex + 1;
+
+            if (63 < *SoundState._SoundEffectIndex) { *SoundState._SoundEffectIndex = 0; } // TODO constant
+
+            if (SoundState._SoundEffectSamples[*SoundState._SoundEffectIndex].Descriptor.CacheControl == SoundCacheMode::Normal
+                && SoundState._SoundEffectSamples[*SoundState._SoundEffectIndex].Descriptor.Priority == 0
+                && SoundState._SoundEffectSamples[*SoundState._SoundEffectIndex].Unk6 == 0
+                && SoundState._SoundEffectSamples[*SoundState._SoundEffectIndex].Lock.Length == 0)
+            {
+                return &SoundState._SoundEffectSamples[*SoundState._SoundEffectIndex];
+            }
+        }
+
+        return NULL;
     }
 }

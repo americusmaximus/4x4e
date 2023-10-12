@@ -25,6 +25,8 @@ SOFTWARE.
 #include "Native.Basic.hxx"
 #include "Sounds.Basic.hxx"
 
+#define DEFAULT_DISTANCE_FACTOR_VALUE (1.0f)
+
 namespace Sounds
 {
     struct SoundEffect;
@@ -122,15 +124,24 @@ namespace Sounds
         void* UnknownMemory2; // 0x00d62080
         void* UnknownMemory3; // 0x00d62038
 
-        void** _UnknownArray1 = (void**)0x00d6203c; // TODO array of 8
+        // TODO the arrays look like arrays of floats
+        f32** _UnknownArray1 = (f32**)0x00d6203c; // TODO array of 8
         void** _UnknownArray2 = (void**)0x00d62084; // TODO array of 8
         void** _UnknownArray3 = (void**)0x00d620a4; // TODO array of 8
         void** _UnknownArray4 = (void**)0x00d62060; // TODO array of 8
 
         s32* _Unknown1 = (s32*)0x00d62034; // TODO
-        s32* _Unknown2 = (s32*)0x00d62028; // TODO
+        s32* _Unknown2 = (s32*)0x00d62028; // TODO Name: NextMixingBuffer.Length
         s32* _Unknown3 = (s32*)0x00d6202c; // TODO
-        s32* _Unknown4 = (s32*)0x00d62030; // TODO
+        u32* _Unknown4 = (u32*)0x00d62030; // TODO
+
+        s32* _Unknown5 = (s32*)0x00d620d0; // TODO
+
+        struct
+        {
+            f32 Value = DEFAULT_DISTANCE_FACTOR_VALUE; //  0x005ff574
+            f32 InverseValue = DEFAULT_DISTANCE_FACTOR_VALUE; // 0x005ff578
+        } DistanceFactor;
     };
 
     extern SoundDeviceControllerContainer SoundDeviceControllerState;
@@ -163,4 +174,10 @@ namespace Sounds
     void SelectSoundDeviceControllerPosition(const f64 x, const f64 y, const f64 z);
 
     void AllocateSoundDeviceControllerMixBuffers(const u32 count, const s32 value);
+
+    s32 AcquireSoundDeviceControllerUnknown5(void);
+    void FillSoundDeviceControllerBuffer(void** data, const u32 bits, const u32 channels, const u32 hz, const u32 count, const u32 offset);
+    void ConvertSoundControllerMixBuffer(const f32* input, void* output, const u32 bits, const  u32 count, const u32 pitch);
+    void SelectSoundDeviceControllerDistanceFactor(const f32 value);
+    void SelectSoundDeviceControllerEnvironment(const f32 volume, const f32 time, const f32 damping);
 }

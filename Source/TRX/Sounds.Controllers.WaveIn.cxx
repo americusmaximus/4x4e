@@ -110,7 +110,7 @@ namespace Sounds
             }
         }
 
-        *SoundWaveInSoundControllerState.Counters._Unknown2 = *SoundWaveInSoundControllerState.Counters._Unknown1 + -1;
+        *SoundWaveInSoundControllerState.Counters._Unknown2 = *SoundWaveInSoundControllerState.Counters._Unknown1 - 1;
         *SoundWaveInSoundControllerState.Counters._Unknown4 = *SoundWaveInSoundControllerState.Counters._Unknown3;
 
         if (waveInStart(*SoundWaveInSoundControllerState._Device) != MMSYSERR_NOERROR)
@@ -310,5 +310,13 @@ namespace Sounds
         }
 
         return TRUE;
+    }
+
+    // 0x00562340
+    u32 AcquireSoundWaveInDeviceControllerUnknownValue1(void)
+    {
+        return (*SoundWaveInSoundControllerState.Mode.Active._Bits >> 3)
+            * *SoundWaveInSoundControllerState.Counters._Unknown3
+            * *SoundWaveInSoundControllerState.Mode.Active._Channels;
     }
 }

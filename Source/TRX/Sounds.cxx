@@ -24,7 +24,9 @@ SOFTWARE.
 #include "Mathematics.Basic.hxx"
 #include "Native.hxx"
 #include "Sounds.Controllers.hxx"
+#include "Sounds.Effects.hxx"
 #include "Sounds.hxx"
+#include "Sounds.Samples.hxx"
 #include "Time.hxx"
 
 #include <math.h>
@@ -54,12 +56,9 @@ namespace Sounds
     // a.k.a. setMaxSwSoundLatency
     void SelectMaximumSoftWareLatency(const f32 value)
     {
-        if (!AcquireSoundDeviceControllerActiveState())
-        {
-            LogError("Unable to select maximum sound latency while sound is active.");
-        }
+        if (!AcquireSoundDeviceControllerActiveState()) { LogError("Unable to select maximum sound latency while sound is active."); }
 
-        *SoundState.Options._MaximumSoftWareLatency = Clamp(value, 0.05f, 2.0f); // TODO constants
+        *SoundState.Options._MaximumSoftWareLatency = Clamp(value, MIN_SOUND_LATENCY, MAX_SOUND_LATENCY);
     }
 
     // 0x00560560
@@ -84,7 +83,7 @@ namespace Sounds
     // a.k.a. unlockSound
     void UnlockSound1(void)
     {
-        if (*SoundState.Lock._Count < 1) { LogError("Unable to unlock sound that was not locked."); } // TODO
+        if (*SoundState.Lock._Count < DEFAULT_SOUND_LOCK_COUNT) { LogError("Unable to unlock sound that was not locked."); }
 
         UnlockSound3();
     }
@@ -92,7 +91,7 @@ namespace Sounds
     // 0x0055e6cc
     void UnlockSound2(void)
     {
-        *SoundState.Lock._Count = *SoundState.Lock._Count + -1;
+        *SoundState.Lock._Count = *SoundState.Lock._Count - 1;
 
         DisposeMutex(SoundState.Lock.Mutex);
     }
@@ -100,9 +99,9 @@ namespace Sounds
     // 0x0055e6bf
     void UnlockSound3(void)
     {
-        if (*SoundState.Lock._Count != 1) // TODO
+        if (*SoundState.Lock._Count != DEFAULT_SOUND_LOCK_COUNT)
         {
-            *SoundState.Lock._Count = *SoundState.Lock._Count + -1;
+            *SoundState.Lock._Count = *SoundState.Lock._Count - 1;
 
             DisposeMutex(SoundState.Lock.Mutex);
 
@@ -141,7 +140,7 @@ namespace Sounds
     {
         if (!StopSoundThread()) { return FALSE; }
 
-        *SoundState.Thread._TimeValue = Max(0.002f, value); //TODO constants
+        *SoundState.Thread._TimeValue = Max(0.002f, value); // TODO constants
 
         *SoundState.Thread._IsActive = FALSE;
         *SoundState.Thread._IsQuit = FALSE;
@@ -192,9 +191,9 @@ namespace Sounds
     // 0x0055fa80
     u32 AcquireSoundChannelCount(void)
     {
-        AcquireSoundOutputOptions(NULL, SoundState.Options._ChannelCount, NULL);
+        AcquireSoundOutputOptions(NULL, SoundState.Options._Channels, NULL);
 
-        return *SoundState.Options._ChannelCount;
+        return *SoundState.Options._Channels;
     }
 
     // 0x0055fa00
@@ -202,7 +201,7 @@ namespace Sounds
     {
         if (bits != NULL) { *bits = *SoundState.Options._Bits; }
 
-        if (channels != NULL) { *channels = *SoundState.Options._ChannelCount; }
+        if (channels != NULL) { *channels = *SoundState.Options._Channels; }
 
         if (hz != NULL) { *hz = *SoundState.Options._HZ; }
     }
@@ -223,105 +222,13 @@ namespace Sounds
         return (offset << 3) / (self->Definition.Channels * self->Definition.BitsPerSample);
     }
 
-    // 0x0055e510
-    // a.k.a. isSfxChannelEnabled
-    BOOL AcquireSoundEffectChannelState(const s32 indx)
-    {
-        if (indx < 0 || 31 < indx) // TODO constant
-        {
-            LogError("Unable to acquire sound effect channel state, invalid index %d.", indx);
-        }
-
-        return SoundState._SoundChannelStates[indx];
-    }
-
-    // 0x0055e490
-    // a.k.a. enableSfxChannel
-    void SelectSoundEffectChannelState(const s32 indx, const BOOL state)
-    {
-        if (indx < 0 || 31 < indx) // TODO constant
-        {
-            LogError("Unable to select sound effect channel state, invalid index %d.", indx);
-        }
-
-        SoundState._SoundChannelStates[indx] = state;
-
-        if (!state)
-        {
-            LockSounds();
-
-            for (u32 x = 0; x < 64; x++) // TODO constant
-            {
-                if (indx == SoundState.Effects._Cache[x].Descriptor.NextChannelIndex)
-                {
-                    DisposeSoundEffect(&SoundState.Effects._Cache[x]);
-                }
-            }
-
-            UnlockSound1();
-        }
-    }
-
-    // 0x0055e370
-    // a.k.a. setSfxChannelVol
-    void SelectSoundEffectChannelVolume(const s32 indx, const f32 volume)
-    {
-        if (indx < 0 || 31 < indx) // TODO constant
-        {
-            LogError("Unable to select sound effect channel volume, invalid index %d.", indx);
-        }
-
-        SoundState.SFX.ChannelVolumes1[indx] = volume;
-
-        if (*SoundState._SoundDeviceController == NULL) { return; }
-
-        if (AcquireSoundDeviceControllerMixMode() == SoundMixMode::None) { return; }
-
-        LockSounds();
-
-        for (u32 x = 0; x < 64; x++) // TODO constant
-        {
-            auto effect = &SoundState.Effects._Cache[x];
-
-            if (effect->Unk32 != 0 && effect->UnknownIndex != 0
-                && effect->Descriptor.NextChannelIndex == indx) // TODO constant
-            {
-                effect->Options = effect->Options | 8; // TODO constant
-            }
-        }
-
-        UnlockSound1();
-    }
-
     // 0x0055fdc0
     // a.k.a. enableHwSoundMixing
     void SelectSoundMixMode(const SoundMixMode mode)
     {
-        if (AcquireSoundDeviceControllerState())
-        {
-            LogError("Unable to select hardware sound mixing mode while device is active.");
-        }
+        if (AcquireSoundDeviceControllerState()) { LogError("Unable to select hardware sound mixing mode while device is active."); }
 
         SoundState.MixMode = mode;
-    }
-
-    // 0x0055e8c0
-    u32 UpdateSoundEffectPositionCount(const f64 x, const f64 y, const f64 z)
-    {
-        if (SoundState.UnknownSoundCount1 != 0) // TODO constant
-        {
-            const auto dx0 = (x - SoundState.Effects.Position.X[0]) * (x - SoundState.Effects.Position.X[0]);
-            const auto dy0 = (y - SoundState.Effects.Position.Y[0]) * (y - SoundState.Effects.Position.Y[0]);
-            const auto dz0 = (z - SoundState.Effects.Position.Z[0]) * (z - SoundState.Effects.Position.Z[0]);
-
-            const auto dx1 = (x - SoundState.Effects.Position.X[1]) * (x - SoundState.Effects.Position.X[1]);
-            const auto dy1 = (y - SoundState.Effects.Position.Y[1]) * (y - SoundState.Effects.Position.Y[1]);
-            const auto dz1 = (z - SoundState.Effects.Position.Z[1]) * (z - SoundState.Effects.Position.Z[1]);
-
-            if ((dx1 + dy1 + dz1) <= (dx0 + dy0 + dz0)) { return 1; } // TODO constant
-        }
-
-        return 0; // TODO constant
     }
 
     // 0x0055eee0
@@ -345,11 +252,11 @@ namespace Sounds
 
         if (value == 0) { SoundState.Effects.Index = 0; } // TODO constant
 
-        if (*SoundState.Lock._Count == 0) { LogError("Unable to unlock unlocked sound."); }
+        if (*SoundState.Lock._Count == MIN_SOUND_LOCK_COUNT) { LogError("Unable to unlock unlocked sound."); }
 
-        if (*SoundState.Lock._Count != 1)
+        if (*SoundState.Lock._Count != DEFAULT_SOUND_LOCK_COUNT)
         {
-            *SoundState.Lock._Count = *SoundState.Lock._Count + -1;
+            *SoundState.Lock._Count = *SoundState.Lock._Count - 1;
 
             DisposeMutex(SoundState.Lock.Mutex);
 
@@ -358,5 +265,21 @@ namespace Sounds
 
         SelectSoundDeviceControllerOptions();
         UnlockSound2();
+    }
+
+    // 0x0055fa40
+    u32 AcquireSoundOutputBitsOptions(void)
+    {
+        AcquireSoundOutputOptions(SoundState.Options._Bits, NULL, NULL);
+
+        return *SoundState.Options._Bits;
+    }
+
+    // 0x0055fa60
+    u32 AcquireSoundOutputFrequencyOptions(void)
+    {
+        AcquireSoundOutputOptions(NULL, NULL, SoundState.Options._HZ);
+
+        return *SoundState.Options._HZ;
     }
 }
