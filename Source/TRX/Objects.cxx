@@ -24,7 +24,7 @@ SOFTWARE.
 
 namespace Objects
 {
-    // TODO
+    // 0x005a0bbd
     void* InitializeObjectCollection(void* self, const u32 count, const AbstractObjectInitializer* initializer)
     {
         auto address = (addr)self;

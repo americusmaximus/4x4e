@@ -23,6 +23,7 @@ SOFTWARE.
 #include "Assets.Sounds.hxx"
 #include "Native.Basic.hxx"
 #include "Sounds.Controllers.hxx"
+#include "Sounds.Disk.hxx"
 
 #define MIN_SOUND_EFFECT_CHANNEL_COUNT 0
 #define MAX_SOUND_EFFECT_CHANNEL_COUNT 32

@@ -68,6 +68,7 @@
     <ClInclude Include="Sounds.Controllers.WaveOut.hxx" />
     <ClInclude Include="Sounds.Devices.DirectSound.hxx" />
     <ClInclude Include="Sounds.Devices.hxx" />
+    <ClInclude Include="Sounds.Disk.hxx" />
     <ClInclude Include="Sounds.Effects.hxx" />
     <ClInclude Include="Sounds.hxx" />
     <ClInclude Include="Sounds.Samples.hxx" />
@@ -112,6 +113,7 @@
     <ClCompile Include="Sounds.Controllers.DirectSoundController.cxx" />
     <ClCompile Include="Sounds.cxx" />
     <ClCompile Include="Sounds.Devices.cxx" />
+    <ClCompile Include="Sounds.Disk.cxx" />
     <ClCompile Include="Sounds.Effects.cxx" />
     <ClCompile Include="Sounds.Samples.cxx" />
     <ClCompile Include="Sounds.Samples.Descriptors.cxx" />

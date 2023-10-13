@@ -25,6 +25,7 @@ SOFTWARE.
 #include "Sounds.Effects.hxx"
 #include "Mathematics.Basic.hxx"
 #include "Logger.hxx"
+#include "Strings.hxx"
 
 #include <math.h>
 #include <stdio.h>
@@ -32,6 +33,7 @@ SOFTWARE.
 using namespace Logger;
 using namespace Mathematics;
 using namespace Objects;
+using namespace Strings;
 
 namespace Sounds
 {
@@ -145,13 +147,13 @@ namespace Sounds
 
         if (self->Sample != NULL)
         {
-            if (self->Sample->Descriptor.Priority < 1) // TODO constant
+            if (self->Sample->Descriptor.ReferenceCount < 1)
             {
                 LogError("Unable to release sound effect %s. Reference count is out of balance.",
                     self->Sample->Descriptor.Definition.Name);
             }
 
-            self->Sample->Descriptor.Priority = self->Sample->Descriptor.Priority - 1;
+            self->Sample->Descriptor.ReferenceCount = self->Sample->Descriptor.ReferenceCount - 1;
 
             auto sample = self->Sample;
 
@@ -159,10 +161,7 @@ namespace Sounds
 
             if (-1 < sample->Unk7) // TODO constant
             {
-                if (sample->Descriptor.Priority != 0)
-                {
-                    LogError("Reference count for sound sample %s is greater than 0.", sample->Descriptor.Definition.Name);
-                }
+                if (sample->Descriptor.ReferenceCount != 0) { LogError("Reference count for sound sample %s is greater than 0.", sample->Descriptor.Definition.Name); }
 
                 if (SoundState.Effects._Cache[sample->Descriptor.Offset].Descriptor.NextChannelIndex != sample->Unk7)
                 {
@@ -979,6 +978,41 @@ namespace Sounds
         }
 
         return 0; // TODO constant
+    }
+
+    // 0x0055df60
+    BOOL AcquireSoundEffectDescriptor(const u32 indx, SoundEffectDescriptor* desc)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        ComputeSoundEffect(effect, MIN_SOUND_VOLUME);
+
+        CopyMemory(desc, &effect->Descriptor, sizeof(SoundEffectDescriptor));
+
+        return TRUE;
+    }
+
+    // 0x0055eb50
+    void DisposeNamedSoundEffect(const char* name)
+    {
+        LockSounds();
+
+        for (u32 x = 0; x < 64; x++) // TODO constant
+        {
+            auto sample = SoundState.Effects._Cache[x].Sample;
+
+            if (sample != NULL)
+            {
+                if (EqualStrings(name, sample->Descriptor.Definition.Name))
+                {
+                    DisposeSoundEffect(&SoundState.Effects._Cache[x]);
+                }
+            }
+        }
+
+        UnlockSound1();
     }
 
     // 0x0055bfb0
