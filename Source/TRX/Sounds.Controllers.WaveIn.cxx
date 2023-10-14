@@ -313,6 +313,7 @@ namespace Sounds
     }
 
     // 0x00562340
+    // INLINE
     u32 AcquireSoundWaveInDeviceControllerUnknownValue1(void)
     {
         return (*SoundWaveInSoundControllerState.Mode.Active._Bits >> 3)

@@ -223,14 +223,14 @@ namespace Sounds
     // 0x0055abf0
     void ReleaseSoundDeviceControllerSoundSample(SoundSample* self)
     {
-        if (self->Descriptor.Offset == 0) { return; } // TODO constant
+        if (self->Index == 0) { return; }
 
         if (*SoundState._SoundDeviceController != NULL)
         {
-            (*SoundState._SoundDeviceController)->Self->ReleaseSoundSample(*SoundState._SoundDeviceController, self->Descriptor.Offset);
+            (*SoundState._SoundDeviceController)->Self->ReleaseSoundSample(*SoundState._SoundDeviceController, self->Index);
         }
 
-        self->Descriptor.Offset = 0; // TODO constant
+        self->Index = 0;
     }
 
     // 0x00560180

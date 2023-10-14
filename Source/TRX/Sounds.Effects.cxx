@@ -76,8 +76,8 @@ namespace Sounds
         ZeroMemory(&self->UserData, MAX_SOUND_USER_DATA_COUNT * sizeof(void*)); // TODO
 
         self->Position = 0.0;
+        self->Seek = SoundSeek::Set;
 
-        self->Unknown1007 = 0;
         self->Unknown1008 = 0;
 
         self->RemainingDelay = -1.0f; // TODO constant
@@ -147,13 +147,9 @@ namespace Sounds
 
         if (self->Sample != NULL)
         {
-            if (self->Sample->Descriptor.ReferenceCount < 1)
-            {
-                LogError("Unable to release sound effect %s. Reference count is out of balance.",
-                    self->Sample->Descriptor.Definition.Name);
-            }
+            if (self->Sample->ReferenceCount < 1) { LogError("Unable to release sound effect %s. Reference count is out of balance.", self->Sample->Descriptor.Definition.Name); }
 
-            self->Sample->Descriptor.ReferenceCount = self->Sample->Descriptor.ReferenceCount - 1;
+            self->Sample->ReferenceCount = self->Sample->ReferenceCount - 1;
 
             auto sample = self->Sample;
 
@@ -161,9 +157,9 @@ namespace Sounds
 
             if (-1 < sample->Unk7) // TODO constant
             {
-                if (sample->Descriptor.ReferenceCount != 0) { LogError("Reference count for sound sample %s is greater than 0.", sample->Descriptor.Definition.Name); }
+                if (sample->ReferenceCount != 0) { LogError("Reference count for sound sample %s is greater than 0.", sample->Descriptor.Definition.Name); }
 
-                if (SoundState.Effects._Cache[sample->Descriptor.Offset].Descriptor.NextChannelIndex != sample->Unk7)
+                if (SoundState.Effects._Cache[sample->Index].Descriptor.NextChannelIndex != sample->Unk7)
                 {
                     LogError("Streaming sound effect sample index mismatch on %s.", sample->Descriptor.Definition.Name);
                 }
@@ -413,6 +409,7 @@ namespace Sounds
     }
 
     // 0x0055d690
+    // INLINE
     void InitializeCurrentSoundEffectDescriptor(void)
     {
         InitializeSoundEffectDescriptor(&SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex]);
@@ -462,6 +459,7 @@ namespace Sounds
     }
 
     // 0x0055d490
+    // INLINE
     void SelectCurrentSoundDescriptorUnknownValues104105(f64x3* value)
     {
         SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].Unknown104.Type = SoundEffectDescriptorUnknownType::Double;
@@ -475,6 +473,7 @@ namespace Sounds
     }
 
     // 0x0055d5c0
+    // INLINE
     void SelectCurrentSoundEffectDescriptorRemainingDelay(const f32 value)
     {
         SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].RemainingDelay = value;
@@ -484,16 +483,16 @@ namespace Sounds
     // a.k.a. setNextSfxUserData
     void SelectCurrentSoundEffectDescriptorUserData(const s32 indx, void* value)
     {
-        if (indx < MIN_SOUND_USER_DATA_COUNT || (MAX_SOUND_USER_DATA_COUNT - 1) < indx) { LogError("Unable to set sound effect user data, invalid index %d.", indx); } // TODO constants
+        if (indx < MIN_SOUND_USER_DATA_COUNT || (MAX_SOUND_USER_DATA_COUNT - 1) < indx) { LogError("Unable to set sound effect user data, invalid index %d.", indx); }
 
         SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].UserData[indx] = value;
     }
 
     // 0x0055d650
-    void SelectCurrentSoundDescriptorPosition(const f64 value, const s32 mode) // TODO params, types, names
+    void SelectCurrentSoundDescriptorPosition(const f64 value, const SoundSeek mode)
     {
         SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].Position = value;
-        SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].Unknown1007 = mode;
+        SoundState._SoundEffectDescriptors[*SoundState._SoundEffectDescriptorIndex].Seek = mode;
     }
 
     // 0x0055e450
@@ -527,24 +526,24 @@ namespace Sounds
             return FALSE;
         }
 
-        if (MIN_SOUND_VOLUME < volume && MIN_SOUND_VOLUME <= self->Volume)
+        if (MIN_SOUND_VOLUME < volume && MIN_SOUND_VOLUME <= self->Volume.Current)
         {
-            if (self->Volume <= volume)
+            if (self->Volume.Current <= volume)
             {
-                if ((self->Unknown1004 & 0x7fffffffU) != 0) // TODO constant
+                if (fpclassify(self->Volume.Maximum) != FP_ZERO)
                 {
                     DisposeSoundEffect(self);
 
                     return FALSE;
                 }
 
-                self->Descriptor.Volume = self->Unknown1002;
+                self->Descriptor.Volume = self->Volume.Minimum;
             }
             else
             {
-                self->Descriptor.Volume = self->Descriptor.Volume + (volume / self->Volume) * (self->Unknown1002 - self->Descriptor.Volume);
+                self->Descriptor.Volume = self->Descriptor.Volume + (volume / self->Volume.Current) * (self->Volume.Minimum - self->Descriptor.Volume);
 
-                self->Volume = self->Volume - volume;
+                self->Volume.Current = self->Volume.Current - volume;
             }
 
             self->Options = self->Options | 8; // TODO constant
@@ -855,6 +854,7 @@ namespace Sounds
     }
 
     // 0x0055e850
+    // INLINE
     BOOL AcquireSoundEffectDistanceState(const f64 x, const f64 y, const f64 z, const f32 distance)
     {
         const auto dx = x - SoundState.Effects.Position.X[SoundState.Effects.Index];
@@ -981,6 +981,7 @@ namespace Sounds
     }
 
     // 0x0055df60
+    // INLINE
     BOOL AcquireSoundEffectDescriptor(const u32 indx, SoundEffectDescriptor* desc)
     {
         auto effect = AcquireSoundEffect(indx, TRUE);
@@ -1013,6 +1014,205 @@ namespace Sounds
         }
 
         UnlockSound1();
+    }
+
+    // 0x0055e220
+    // a.k.a. setSfxUserData
+    BOOL SelectSoundEffectDescriptorUserData(const u32 indx, const s32 index, void* value)
+    {
+        if (index < MIN_SOUND_USER_DATA_COUNT || (MAX_SOUND_USER_DATA_COUNT - 1) < index) { LogError("Unable to set sound effect user data, invalid index %d.", index); }
+
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Descriptor.UserData[index] = value;
+
+        return TRUE;
+    }
+
+    // 0x0055de60
+    // INLINE
+    BOOL AcquireSoundEffectSoundSampleDescriptor(const u32 indx, SoundSampleDescriptor* desc)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        CopyMemory(desc, &effect->Sample->Descriptor, sizeof(SoundSampleDescriptor));
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055e2f0
+    BOOL SelectSoundEffectVolumeValues(const u32 indx, const f32 min, const f32 volume, const u32 max)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Volume.Minimum = min;
+        effect->Volume.Current = volume;
+        effect->Volume.Maximum = (f32)max;
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055e290
+    BOOL SelectSoundEffectDebugMode(const u32 indx, const BOOL mode)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->DebugMode = mode;
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055e110
+    BOOL SelectSoundEffectUnknown104Single(const u32 indx, f32x3* value)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Descriptor.Unknown104.Single = value;
+        effect->Descriptor.Unknown104.Type = SoundEffectDescriptorUnknownType::Single;
+
+        effect->Options = effect->Options | 4; // TODO constant
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055e150
+    BOOL SelectSoundEffectUnknown104Double(const u32 indx, f64x3* value)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Descriptor.Unknown104.Double = value;
+        effect->Descriptor.Unknown104.Type = SoundEffectDescriptorUnknownType::Double;
+
+        effect->Options = effect->Options | 4; // TODO constant
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055e010
+    BOOL SelectSoundEffectUnknown102Single(const u32 indx, f32x3* value)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Descriptor.Unknown102.Type = SoundEffectDescriptorUnknownType::Single;
+        effect->Descriptor.Unknown102.Single = value;
+
+        effect->Options = effect->Options | 2; // TODO constant
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055e050
+    BOOL SelectSoundEffectUnknown102Double(const u32 indx, f64x3* value)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Descriptor.Unknown102.Type = SoundEffectDescriptorUnknownType::Double;
+        effect->Descriptor.Unknown102.Double = value;
+
+        ComputeSoundEffect(effect, MIN_SOUND_VOLUME);
+
+        if (effect->UnknownIndex != 0 && *SoundState._SoundDeviceController != NULL)
+        {
+            (*SoundState._SoundDeviceController)->Self->SelectSoundEffectOptions(*SoundState._SoundDeviceController, effect, 2); // TODO constant
+        }
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055e0b0
+    BOOL SelectSoundEffectVelocity(const u32 indx, const f32 x, const f32 y, const f32 z)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Descriptor.Unknown104.Type = SoundEffectDescriptorUnknownType::None;
+        effect->Descriptor.Unknown104.Single = NULL;
+
+        effect->Descriptor.Velocity.X = x;
+        effect->Descriptor.Velocity.Y = y;
+        effect->Descriptor.Velocity.Z = z;
+
+        effect->Options = effect->Options | 4; // TODO constant
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055dfa0
+    BOOL SelectSoundEffectLocation(const u32 indx, const f64 x, const f64 y, const f64 z)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return FALSE; }
+
+        effect->Descriptor.Unknown102.Type = SoundEffectDescriptorUnknownType::None;
+        effect->Descriptor.Unknown102.Single = NULL;
+
+        effect->Descriptor.Location.X = x;
+        effect->Descriptor.Location.Y = y;
+        effect->Descriptor.Location.Z = z;
+
+        effect->Options = effect->Options | 2; // TODO constant
+
+        UnlockSound1();
+
+        return TRUE;
+    }
+
+    // 0x0055dea0
+    f64 CalculateSoundEffectPosition(const u32 indx, const SoundSeek mode)
+    {
+        auto effect = AcquireSoundEffect(indx, TRUE);
+
+        if (effect == NULL) { return -1.0; } // TODO constant
+
+        if (effect->UnknownIndex != 0 && *SoundState._SoundDeviceController != NULL)
+        {
+            if (!PollSoundEffectStream(effect))
+            {
+                UnlockSound1();
+
+                return -1.0; // TODO constant
+            }
+        }
+
+        const auto result = CalculateSoundSampleDescriptorPosition(&effect->Sample->Descriptor, effect->Descriptor.Position, effect->Descriptor.Seek, mode);
+
+        UnlockSound1();
+
+        return result;
     }
 
     // 0x0055bfb0
