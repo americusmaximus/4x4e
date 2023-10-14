@@ -25,6 +25,8 @@ SOFTWARE.
 #include "Basic.hxx"
 #include "Native.Basic.hxx"
 
+#include <stdio.h>
+
 #define STANDARD_IO_DISK_NAME_LENGTH 3
 #define STANDARD_IO_FILE_NAME_LENGTH 256
 #define STANDARD_IO_DIRECTORY_NAME_LENGTH 256

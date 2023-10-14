@@ -57,7 +57,7 @@ namespace Sounds
             u32* _Channels = (u32*)0x005ff55c; // TODO, default value SOUND_CHANNEL_COUNT_STEREO
             u32* _HZ = (u32*)0x005ff560; // TODO, default value SOUND_FREQUENCY_22050
 
-            f32* _MaximumSoftWareLatency = (f32*)0x005ff584;//todo, default value DEFAULT_SOUND_LATENCY
+            f32 MaximumSoftWareLatency = DEFAULT_SOUND_LATENCY; // 0x005ff584
         } Options;
 
         struct
@@ -155,7 +155,7 @@ namespace Sounds
     DWORD WINAPI StartSoundThread(LPVOID);
     f32 AcquireMaximumSoftWareSoundLatency(void);
     f64 AcquireUnknownSoundValue101(const f64 value);
-    SoundMixMode AcquireSoundMixMode2(void);
+    SoundMixMode AcquireSoundMixMode(void);
     u32 AcquireSoundChannelCount(void);
     u32 AcquireSoundOutputBitsOptions(void);
     u32 AcquireSoundOutputFrequencyOptions(void);
@@ -171,4 +171,7 @@ namespace Sounds
 
     typedef const void(CDECLAPI* FUN_0055CAD0) (SoundEffect*); // TODO
     static FUN_0055CAD0 FUN_0055cad0 = (FUN_0055CAD0)0x0055cad0;//TODO
+
+    typedef const BOOL(CDECLAPI* FUN_004925A0) (SoundDecoder*, s32); // TODO
+    static FUN_004925A0 FUN_004925a0 = (FUN_004925A0)0x004925a0;//TODO
 }

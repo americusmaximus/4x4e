@@ -84,7 +84,7 @@ namespace Sounds
         SoundDevice SoundDevices[MAX_SOUND_DEVICE_COUNT]; // 0x00d61758
 
         s32 EnumeratedDeviceCount = INVALID_SOUND_DEVICE_COUNT; // 0x005ff514
-        s32* _SoundDeviceIndex = (s32*)0x005ff56c; // TODO INVALID_SOUND_DEVICE_INDEX
+        s32 SoundDeviceIndex = INVALID_SOUND_DEVICE_INDEX; // 0x005ff56c
         SoundDeviceDetail EnumeratedDevices[MAX_SOUND_ENUMERATED_DEVICE_COUNT]; // 0x00d3bbd4
 
         s32 SoundRecordingDeviceCount = INVALID_SOUND_RECORDING_DEVICE_COUNT; // 0x005ff588

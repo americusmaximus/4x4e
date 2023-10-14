@@ -23,6 +23,7 @@ SOFTWARE.
 #pragma once
 
 #include "Basic.hxx"
+#include "IO.Ini.hxx"
 #include "Renderers.Basic.hxx"
 
 #define OPTIONS_INI_FILE_NAME ".\\system\\metal.ini"
@@ -257,4 +258,7 @@ namespace App::Options
 
     void LoadAppOptions(void);
     void SaveAppOptions(void);
+
+    void LoadSoundOptions(IO::Ini::AbstractIni* ini);
+    void SaveSoundOptions(IO::Ini::AbstractIni* ini);
 }
