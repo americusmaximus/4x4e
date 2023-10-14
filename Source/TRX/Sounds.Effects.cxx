@@ -119,9 +119,6 @@ namespace Sounds
         UnlockSound1();
     }
 
-    typedef const BOOL(CDECLAPI* FUN_00558AE0) (const u32); // TODO
-    static FUN_00558AE0 FUN_00558ae0 = (FUN_00558AE0)0x00558ae0; // TODO
-
     // 0x0055c930
     void DisposeSoundEffect(SoundEffect* self)
     {
@@ -167,7 +164,7 @@ namespace Sounds
                 DisposeSoundSample(sample);
             }
 
-            FUN_00558ae0(0); // TODO constant
+            ReduceSoundSampleAllocation(0);
 
             sample->Unk7 = -1; // TODO constant
         }
