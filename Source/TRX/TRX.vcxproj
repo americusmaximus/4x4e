@@ -71,9 +71,12 @@
     <ClInclude Include="Sounds.Disk.hxx" />
     <ClInclude Include="Sounds.Effects.hxx" />
     <ClInclude Include="Sounds.hxx" />
+    <ClInclude Include="Sounds.Manager.hxx" />
+    <ClInclude Include="Sounds.Options.hxx" />
     <ClInclude Include="Sounds.Samples.hxx" />
     <ClInclude Include="Strings.hxx" />
     <ClInclude Include="Time.hxx" />
+    <ClInclude Include="Vehicles.Sounds.hxx" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cxx" />
@@ -116,10 +119,13 @@
     <ClCompile Include="Sounds.Devices.cxx" />
     <ClCompile Include="Sounds.Disk.cxx" />
     <ClCompile Include="Sounds.Effects.cxx" />
+    <ClCompile Include="Sounds.Manager.cxx" />
+    <ClCompile Include="Sounds.Options.cxx" />
     <ClCompile Include="Sounds.Samples.cxx" />
     <ClCompile Include="Sounds.Samples.Descriptors.cxx" />
     <ClCompile Include="Strings.cxx" />
     <ClCompile Include="Time.cxx" />
+    <ClCompile Include="Vehicles.Sounds.cxx" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

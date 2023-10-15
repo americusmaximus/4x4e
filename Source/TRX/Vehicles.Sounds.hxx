@@ -20,9 +20,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "App.Options.hxx"
+#pragma once
 
-namespace App::Options
+#include "Objects.hxx"
+
+#define MAX_SOUND_VEHICLE_SOUND_EFFECT_COUNT 10
+
+namespace Vehicles
 {
+    // a.k.a. CVehicleSfx
+    struct VehicleSoundEffect
+    {
+        s32 Unk[44]; // TODO
+    };
 
+    VehicleSoundEffect* ConstructVehicleSoundEffect(VehicleSoundEffect* self);
+    void* ReleaseVehicleSoundEffect(VehicleSoundEffect* self);
+
+    struct VehicleSoundEffectContainer
+    {
+        VehicleSoundEffect* _Items = (VehicleSoundEffect*)0x00d6d198; // TODO Array of MAX_SOUND_VEHICLE_SOUND_EFFECT_COUNT
+
+        // 9x005ef110
+        Objects::AbstractObjectInitializer Initializer =
+        {
+            .Options = 0x20100, // TODO
+            .Initialize = (Objects::ABSTRACTOBJECTINITIALIZERINITIALIZE)&ConstructVehicleSoundEffect,
+            .Assign = NULL,
+            .Release = (Objects::ABSTRACTOBJECTINITIALIZERRELEASE)&ReleaseVehicleSoundEffect,
+            .Size = sizeof(VehicleSoundEffect),
+            .Name = "$CVehicleSfx$$"
+        };
+    };
+
+    extern VehicleSoundEffectContainer VehicleSoundEffectState;
 }

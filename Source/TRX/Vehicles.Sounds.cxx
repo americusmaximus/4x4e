@@ -20,9 +20,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "App.Options.hxx"
+#include "Vehicles.Sounds.hxx"
 
-namespace App::Options
+namespace Vehicles
 {
+    VehicleSoundEffectContainer VehicleSoundEffectState;
 
+    // 0x00582740
+    VehicleSoundEffect* ConstructVehicleSoundEffect(VehicleSoundEffect* self)
+    {
+        return self;
+    }
+
+    // 0x00582750
+    void* ReleaseVehicleSoundEffect(VehicleSoundEffect* self)
+    {
+        return self;
+    }
 }

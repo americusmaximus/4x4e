@@ -20,9 +20,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "App.Options.hxx"
+#pragma once
 
-namespace App::Options
+#include "Basic.hxx"
+
+namespace Sounds
 {
+    // a.k.a. CSound
+    struct SoundManager
+    {
+        u8 IsActive;
+    };
 
+    struct SoundManagerContainer
+    {
+        BOOL* _UnknownValue101 = (BOOL*)0x0078dfc4; // TODO
+
+        u32* _SoundEffectIndex = (u32*)0x00d6e104; // TODO
+
+        BOOL* _IsActive = (BOOL*)0x00d6e100; // TODO
+
+        SoundManager* _Instance = (SoundManager*)0x00d6d175; //TODO
+    };
+
+    extern SoundManagerContainer SoundManagerState;
+
+    void LoadSoundManagerOptions(SoundManager* self, const char* file, const char* section);
+    void SaveSoundManagerOptions(SoundManager* self, const char* file, const char* section);
+
+    void InitializeSoundManager(SoundManager* self);
+    void StartSoundManager(SoundManager* self);
+    void CloseSoundManager(SoundManager* self);
 }

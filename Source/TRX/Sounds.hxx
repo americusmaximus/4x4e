@@ -24,6 +24,7 @@ SOFTWARE.
 #include "Native.Basic.hxx"
 #include "Sounds.Controllers.hxx"
 #include "Sounds.Disk.hxx"
+#include "Sounds.Manager.hxx"
 
 #define MIN_SOUND_EFFECT_CHANNEL_COUNT 0
 #define MAX_SOUND_EFFECT_CHANNEL_COUNT 32
@@ -45,6 +46,8 @@ namespace Sounds
     struct SoundContainer
     {
         SoundMixMode MixMode = SoundMixMode::Advanced; // 0x005ff570
+
+        SoundManager** _Manager = (SoundManager**)0x00601b24; // TODO, points to SoundManagerState.Instance
 
         struct
         {

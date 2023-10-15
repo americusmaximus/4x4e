@@ -20,9 +20,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "App.Options.hxx"
+#pragma once
 
-namespace App::Options
+#include "IO.Ini.hxx"
+
+namespace Sounds::Options
 {
-
+    void LoadSoundOptions(IO::Ini::AbstractIni* ini);
+    void SaveSoundOptions(IO::Ini::AbstractIni* ini);
 }

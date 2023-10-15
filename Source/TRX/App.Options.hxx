@@ -258,7 +258,4 @@ namespace App::Options
 
     void LoadAppOptions(void);
     void SaveAppOptions(void);
-
-    void LoadSoundOptions(IO::Ini::AbstractIni* ini);
-    void SaveSoundOptions(IO::Ini::AbstractIni* ini);
 }
