@@ -10,8 +10,6 @@ There are multiple goals this project tries to achieve:
 3. Eventually, to support 64-bit compilation for modern systems, and provide an avenue for development of modern renderer implementations such as DirectX or Vulkan.
 4. Also, eventually, to support modern input devices that do not comply with DirectInput, and even port to Linux or Mac.
 
-The game is heavily dependent on Windows API, these calls are sprinkled all over the code base, not to mention use of Windows-only APIs like DirectSound and DirectInput. I **do not** intend to port the game to other platforms, you are welcome though.
-
 ## Requirements & Dependencies
 1. [Microsoft Visual Studio](https://visualstudio.microsoft.com/downloads/)
 2. [Microsoft DirectX 9.0 SDK (June 2010)](https://www.microsoft.com/en-US/download/details.aspx?id=6812) 
@@ -26,9 +24,10 @@ The game is heavily dependent on Windows API, these calls are sprinkled all over
 DirectX 9.0 renderer is a back-ported version of DirectX 8.0 renderer from [4x4e2](https://github.com/americusmaximus/4x4e2). 4x4 Evolution 2 has DirectX 8.0 renderers that were also updated to DirectX 9.0. This renderer is also important for the future 64-bit compatibility.
 
 ## Notes
-1. The target game is Build 57, which is quite different from the original release, also known as Build 44. The code is **NOT** compatible with the original release.
-2. DirectX 7.0 performance desires to be better. It seems like it is being fully software emulated these days, moreover, some graphic cards drivers have incorrect or inomplete support of DirectX 7.0, thus using other renderers is encouraged for better performance.
-3. This project has no connection to the work that the community of the [4x4 Evolution Revival Project](https://www.4x4evolution.net/doku.php?id=start) does.
+1. The original game was compiled by Watcom C/C++ compiler, it contains the following sting: `WATCOM C/C++32 Run-Time system. (c) Copyright by WATCOM International Corp. 1988-1995. All rights reserved.`. The game and the modules use cdecl calling convention.
+2. The target game is Build 57, which is quite different from the original release, also known as Build 44. The code is **NOT** compatible with the original release.
+4. DirectX 7.0 performance desires to be better. It seems like it is being fully software emulated these days, moreover, some graphic cards drivers have incorrect or inomplete support of DirectX 7.0, thus using other renderers is encouraged for better performance.
+5. This project has no connection to the work that the community of the [4x4 Evolution Revival Project](https://www.4x4evolution.net/doku.php?id=start) does.
 
 ## Thanks
 1. Thanks to [My Abandonware](https://www.myabandonware.com/) for providing [4x4 Evo](https://www.myabandonware.com/game/4x4-evo-3fl) and the Build 57 patch.
