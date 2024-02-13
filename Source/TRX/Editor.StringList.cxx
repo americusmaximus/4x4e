@@ -62,6 +62,8 @@ namespace Editor
         {
             AttachStringList(self, AcquireStringList(value, x));
         }
+
+        return self;
     }
 
     // 0x0043dd90
